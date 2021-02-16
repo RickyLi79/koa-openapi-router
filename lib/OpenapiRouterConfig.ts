@@ -7,7 +7,7 @@ export const defaultOpenapiRouterConfig:IOpenapiRouterConfig = {
 
   recursive: true,
   watcher: {
-    enabled: true,
+    enabled: false,
     interval: 3000,
   },
 
