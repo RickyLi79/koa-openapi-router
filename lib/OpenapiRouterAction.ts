@@ -36,7 +36,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
       ctx.set(TEST_RESPONSE_HEADER_REQUEST_SCHEMA, JSON.stringify(operation));
     }
 
-    if (action === undefined) {
+    if (action.action === undefined) {
       ctx.status = 501;
       return;
     }
@@ -169,7 +169,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
     }
 
     ctx[CTX_OPERATION_SCHEMA] = operation;
-    await action(ctx, next);
+    await action.action!(ctx, next);
 
     if (config.validSchema.reponse) {
       do {

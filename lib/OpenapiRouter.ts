@@ -15,6 +15,8 @@ const OPENAPI_ROUTER_LOGGER = Symbol('OpenapiRouter#openapiRouterLogger');
 const OPENAPI_ROUTER_MIDDLEWARE = Symbol('OpenapiRouter#openapiRouterMiddlerware');
 export const X_OAS_VER = 'x-oas-ver';
 
+type KoaControllerActionInfo = { file: string, func: string, action?: KoaControllerAction };
+
 const OPENAPI_FILE_EXTS = { '.json': true, '.yaml': true, '.yml': true };
 function isDocsExt(file: string) {
   return OPENAPI_FILE_EXTS[path.extname(file).toLowerCase()] !== undefined;
@@ -169,18 +171,26 @@ export class OpenapiRouter {
 
   // #endregion
 
-  public proxyAction: KoaControllerAction | undefined;
-  private koaControllerActionMap: { [opt: string]: KoaControllerAction } = {};
-  public getKoaControllerAction(opt: string, qry?: { method: string, path: string }) {
-    if (this.proxyAction) { return this.proxyAction; }
-    let action: KoaControllerAction | undefined = this.koaControllerActionMap[opt];
-    if (action !== undefined || qry === undefined) {
-      return action;
+  public proxyAction?: KoaControllerAction;
+  private koaControllerActionMap: { [opt: string]: KoaControllerActionInfo } = {};
+  public getKoaControllerAction(opt: string, qry?: { method: string, path: string }): KoaControllerActionInfo {
+    if (this.proxyAction) {
+      return {
+        file: '---',
+        func: '*proxy action*',
+        action: this.proxyAction,
+      };
     }
+    let actionInfo: KoaControllerActionInfo = this.koaControllerActionMap[opt];
+    if (actionInfo !== undefined || qry === undefined) {
+      return actionInfo;
+    }
+
     const operation: any = this.getOperationByOpt(opt);
     {
-      let ctl: any;
       const tag = operation.tags?.[0] ?? 'default';
+      actionInfo = { file: tag + '.js', func: '' };
+      let ctl: any;
       try {
         const ctlCls = require(path.join(this.config.controllerDir, tag));
         if (ctlCls.__esModule) {
@@ -192,15 +202,24 @@ export class OpenapiRouter {
         } else {
           ctl = ctlCls;
         }
-        action = ctl[qry.method.toUpperCase() + ' ' + qry.path] ??
-          ctl['ALL ' + qry.path] ??
-          ctl[qry.path]; //
+        let func = qry.method.toUpperCase() + ' ' + qry.path;
+        actionInfo.action = ctl[func];
+        if (!actionInfo.action) {
+          func = 'ALL ' + qry.path;
+          actionInfo.action = ctl[func];
+        }
+        if (!actionInfo.action) {
+          func = qry.path;
+          actionInfo.action = ctl[func];
+        } else {
+          func = '';
+        }
       } catch (e) {
         // this.logger.error(e);
       }
     }
-    this.koaControllerActionMap[opt] = action!;
-    return action;
+    this.koaControllerActionMap[opt] = actionInfo;
+    return actionInfo;
   }
   public getKoaControllerActionFile(opt: string) {
     const operation: any = this.getOperationByOpt(opt);
@@ -393,13 +412,13 @@ export class OpenapiRouter {
         const iOperation = iPathItem[iMethod];
         iOperation[X_OAS_VER] = specVersion;
         this.operationMap[opt] = iOperation;
-        const action = this.getKoaControllerAction(opt, { method: iMethod, path: iPath2 });
+        const actionInfo = this.getKoaControllerAction(opt, { method: iMethod, path: iPath2 });
         this.addRouter(opt, iMethod, iPath2);
-        const fullOpt = `${iMethod.toUpperCase()} ${this.routerPrefix}${iPath2}`;
-        if (action !== undefined) {
-          this.logger.debug(`openapi-router connected : opt='${fullOpt}'`);
+        // const fullOpt = `${iMethod.toUpperCase()} ${this.routerPrefix}${iPath2}`;
+        if (actionInfo.action !== undefined) {
+          this.logger.debug(`openapi-router connected : opt='${opt}' in ${actionInfo.file}#${actionInfo.func}`);
         } else {
-          this.logger.error(`Can not connnect router : opt='${fullOpt}'`);
+          this.logger.error(`Can not connnect router : opt='${opt}' in ${actionInfo.file}#${actionInfo.func} `);
         }
       }
     }
