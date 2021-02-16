@@ -1,0 +1,48 @@
+openapi: 3.0.0
+info:
+  title: "API"
+  version: "1.0.0"
+paths:
+  /no/such/action/api3:
+    get:
+      responses:
+        default:
+          description: default
+
+  /valid/request/contentType:
+    get:
+      description: no `content-type`
+      tags:
+        - valid.request
+      responses:
+        default:
+          description: default
+    post:
+      description: "'content-type' optional"
+      tags:
+        - valid.request
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+
+      responses:
+        default:
+          description: default
+          
+    patch:
+      description: "'content-type' required"
+      tags:
+        - valid.request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+
+      responses:
+        default:
+          description: default

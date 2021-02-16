@@ -1,0 +1,27 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "api2.oas3.json",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/no/such/action/api2":{
+      "get": {
+        "responses": {
+          "default":{
+            "description": "unexpected error"
+          }
+        }
+      }
+    },
+    "/path/of/api2":{
+      "get": {
+        "responses": {
+          "default":{
+            "description": "default"
+          }
+        }
+      }
+    }
+  }
+}

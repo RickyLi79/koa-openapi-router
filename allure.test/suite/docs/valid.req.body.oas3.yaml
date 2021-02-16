@@ -1,0 +1,186 @@
+openapi: 3.0.0
+info:
+  title: "API"
+  version: "1.0.0"
+paths:
+  /no/such/action/api3:
+    get:
+      responses:
+        default:
+          description: default
+  /path/of/api3:
+    get:
+      description: test action locate
+      tags:
+        - valid.request
+      responses:
+        default:
+          description: default
+
+  /valid/request/path/{p1}/{p2}:
+    get:
+      tags:
+        - valid.request
+      parameters:
+        - name: p1
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 5
+        - name: p2
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 5
+      responses:
+        default:
+          description: default
+  /valid/request/header:
+    get:
+      description: required header
+      tags:
+        - valid.request
+      parameters:
+        - name: h1
+          in: header
+          required: true
+          schema:
+            type: string
+            maxLength: 5
+        - name: h2
+          in: header
+          schema:
+            type: string
+            maxLength: 5
+      responses:
+        default:
+          description: default
+    post:
+      description: optional header
+      tags:
+        - valid.request
+      parameters:
+        - name: h1
+          in: header
+          schema:
+            type: string
+            maxLength: 5
+      responses:
+        default:
+          description: default
+  /valid/request/query:
+    get:
+      description: required query
+      tags:
+        - valid.request
+      parameters:
+        - name: q1
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 5
+      responses:
+        default:
+          description: default
+    post:
+      description: optional query
+      tags:
+        - valid.request
+      parameters:
+        - name: q1
+          in: query
+          schema:
+            type: string
+            maxLength: 5
+      responses:
+        default:
+          description: default
+  /valid/request/cookie:
+    get:
+      description: required cookie
+      tags:
+        - valid.request
+      parameters:
+        - name: c1
+          in: cookie
+          required: true
+          schema:
+            type: string
+            maxLength: 5
+      responses:
+        default:
+          description: default
+    post:
+      description: optional cookie
+      tags:
+        - valid.request
+      parameters:
+        - name: c1
+          in: cookie
+          schema:
+            type: string
+            maxLength: 5
+      responses:
+        default:
+          description: default
+  /valid/request/body:
+    post:
+      description: required `body`
+      tags:
+        - valid.request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - time
+              properties:
+                value:
+                  type: integer
+                  maximum: 5
+                time:
+                  type: string
+                  format: date-time
+          text/plain:
+            schema:
+              type: string
+              maxLength: 5
+          application/x-www-form-urlencoded:
+            schema:
+              type: string
+      responses:
+        default:
+          description: default
+    patch:
+      description: optional `body`
+      tags:
+        - valid.request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - time
+              properties:
+                value:
+                  type: integer
+                  maximum: 5
+                time:
+                  type: string
+                  format: date-time
+          text/plain:
+            schema:
+              type: string
+              maxLength: 5
+          application/x-www-form-urlencoded:
+            schema:
+              type: string
+      responses:
+        default:
+          description: default

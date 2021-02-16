@@ -1,0 +1,60 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "api2.oas3.json",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/valid/request/contentType": {
+      "get": {
+        "description": "no `content-type`",
+        "tags": [
+          "valid.request"
+        ],
+        "responses": {
+          "default": {
+            "description": "unexpected error"
+          }
+        }
+      },
+      "post": {
+        "description": "`content-type` optional",
+        "tags": [
+          "valid.request"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "responses": {
+          "default": {
+            "description": "unexpected error"
+          }
+        }
+      },
+      "patch": {
+        "description": "`content-type` required",
+        "tags": [
+          "valid.request"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "unexpected error"
+          }
+        }
+      }
+    }
+  }
+}

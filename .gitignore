@@ -1,0 +1,8 @@
+node_modules/
+test/**/*.js
+test/**/*.map
+allure.test/**/*.js
+allure.test/**/*.map
+lib/**/*.map
+allure-results/
+allure-report/

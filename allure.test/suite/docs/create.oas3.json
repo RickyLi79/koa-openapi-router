@@ -1,0 +1,116 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "api1.oas3.json",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/no/such/action/api1": {
+      "get": {
+        "responses": {
+          "default": {
+            "description": "unexpected error"
+          }
+        }
+      }
+    },
+    "/path/of/api1": {
+      "get": {
+        "description": "no tags",
+        "responses": {
+          "default": {
+            "description": "default"
+          }
+        }
+      }
+    },
+    "/path2/of/api1": {
+      "get": {
+        "tags": [
+          "tag1"
+        ],
+        "description": "has `tags[0]`",
+        "responses": {
+          "default": {
+            "description": "default"
+          }
+        }
+      }
+    },
+    "/path/parameter/{p1}/{p2}": {
+      "get": {
+        "description": "path parameter",
+        "responses": {
+          "default": {
+            "description": "default"
+          }
+        }
+      }
+    },
+    "/path3/of/api1": {
+      "get": {
+        "tags": [
+          "actoinNameTesting"
+        ],
+        "description": "action name testing",
+        "responses": {
+          "default": {
+            "description": "default"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "actoinNameTesting"
+        ],
+        "description": "action name testing",
+        "requestBody":{
+          "required": true,
+          "content": {
+            "application/json":{
+              "schema":{
+                "type": "object",
+                "properties": {
+                  "num":{
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "default"
+          }
+        }
+      }
+    },
+    "/path4/of/api1": {
+      "get": {
+        "tags": [
+          "actoinNameTesting"
+        ],
+        "description": "action name testing",
+        "responses": {
+          "default": {
+            "description": "default"
+          }
+        }
+      }
+    },
+    "/path5/of/api1": {
+      "get": {
+        "tags": [
+          "actoinNameTesting"
+        ],
+        "description": "action name testing",
+        "responses": {
+          "default": {
+            "description": "default"
+          }
+        }
+      }
+    }
+  }
+}

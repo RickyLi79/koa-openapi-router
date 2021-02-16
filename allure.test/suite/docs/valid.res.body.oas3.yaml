@@ -1,0 +1,43 @@
+openapi: 3.0.0
+info:
+  title: "API"
+  version: "1.0.0"
+paths:
+  /valid/response/body:
+    get:
+      description: no `response.body` schema
+      tags:
+        - valid.response.body
+      responses:
+        default:
+          description: default
+    post:
+      description: "`response.body` , valid"
+      tags:
+        - valid.response.body
+      responses:
+        200:
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    enum:
+                      - 1
+    patch:
+      description: "`response.body` , invalid"
+      tags:
+        - valid.response.body
+      responses:
+        200:
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    enum:
+                      - 2

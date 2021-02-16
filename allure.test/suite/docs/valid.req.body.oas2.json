@@ -1,0 +1,76 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "api2.oas3.json",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/valid/request/body": {
+      "post": {
+        "tags": [
+          "valid.request"
+        ],
+        "consumes":["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["time"],
+              "properties": {
+                "time": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "value": {
+                  "type": "integer",
+                  "maximum": 5
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "unexpected error"
+            
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "valid.request"
+        ],
+        "consumes":["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "required": ["time"],
+              "properties": {
+                "time": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "value": {
+                  "type": "integer",
+                  "maximum": 5
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "description": "unexpected error"
+          }
+        }
+      }
+    }
+  }
+}

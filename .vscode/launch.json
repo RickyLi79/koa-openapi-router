@@ -1,0 +1,84 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "test",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "runtimeExecutable": "npm",
+      "windows": {
+        "runtimeExecutable": "npm.cmd"
+      },
+      "runtimeArgs": [
+        "run",
+        "test"
+      ],
+      // "console": "integratedTerminal",
+      "protocol": "auto",
+      "restart": true,
+      "port": 9229,
+      "autoAttachChildProcesses": false,
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+    },
+    {
+      "name": "mocha:debug",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "runtimeExecutable": "npm",
+      "windows": {
+        "runtimeExecutable": "npm.cmd"
+      },
+      "runtimeArgs": [
+        "run",
+        "mocha:debug"
+      ],
+      "protocol": "auto",
+      "restart": false,
+      "port": 9229,
+      "autoAttachChildProcesses": true,
+      "console": "internalConsole",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+      "name": "allureTest",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "runtimeExecutable": "npm",
+      "windows": {
+        "runtimeExecutable": "npm.cmd"
+      },
+      "runtimeArgs": [
+        "run",
+        "allureTest"
+      ],
+      "protocol": "auto",
+      "restart": false,
+      "port": 9229,
+      "autoAttachChildProcesses": true,
+      "console": "internalConsole",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+      "name": "dev:debug",
+      "type": "node",
+      "request": "launch",
+      "args": [
+        "${workspaceRoot}/dev/debug.ts" // 入口文件
+      ],
+      "runtimeArgs": [
+        "--nolazy",
+        "-r",
+        "ts-node/register"
+      ],
+      // "sourceMaps": true,
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector",
+      "console": "internalConsole",
+      "internalConsoleOptions": "openOnSessionStart"
+    }
+  ]
+}

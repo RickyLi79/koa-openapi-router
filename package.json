@@ -1,0 +1,63 @@
+{
+  "name": "koa-openapi-router",
+  "version": "1.0.0",
+  "description": "config koa-router by openapi, valid the request by opanapi",
+  "typings": "typings",
+  "scripts": {
+    "mocha:debug": "mocha -R mocha-multi-reporters --reporter-options configFile=mocha-multi-reporters.json --timeout 1000000 --colors --require ts-node/register allure.test/debug.ts",
+    "dev:debug": "node --require ts-node/register dev/debug.ts",
+    "lint": "eslint . --ext .ts",
+    "clean": "tsc clean",
+    "allure": "npm run allure:test && npm run allure:report",
+    "allure:debug": "npm run allure:clean && node sleep.js 1 && npm run mocha:debug && npm run allure:report",
+    "allure:report": "allure generate allure-results --clean -o allure-report && allure open -h localhost -p 5501 allure-report",
+    "allure:clean": "rimraf ./allure-results",
+    "allure:test": "npm run allure:clean && node sleep.js 1 && mocha -R mocha-multi-reporters --reporter-options configFile=mocha-multi-reporters.json --timeout 5000 --colors --require ts-node/register allure.test/**/*.allure.ts"
+  },
+  "keywords": [
+    "koa",
+    "openapi",
+    "router",
+    "valid",
+    "schema"
+  ],
+  "author": {
+    "name": "RickyLi79",
+    "email": "382688672@qq.com",
+    "url": "https://github.com/RickyLi79"
+  },
+  "homepage": "https://github.com/RickyLi79/koa-openapi-router",
+  "license": "MIT",
+  "devDependencies": {
+    "@testdeck/mocha": "^0.1.2",
+    "@types/extend": "^3.0.1",
+    "@types/koa": "^2.11.8",
+    "@types/koa-bodyparser": "^4.3.0",
+    "@types/koa-router": "^7.4.1",
+    "@types/node": "^14.14.28",
+    "@types/supertest": "^2.0.10",
+    "@types/watch": "^1.0.1",
+    "allure-js-commons": "2.0.0-beta.7",
+    "allure-mocha": "2.0.0-beta.7",
+    "eslint": "^7.20.0",
+    "eslint-config-egg": "^9.0.0",
+    "koa": "^2.13.1",
+    "koa-bodyparser": "^4.3.0",
+    "koa-router": "^10.0.0",
+    "mocha": "^8.3.0",
+    "mocha-multi-reporters": "^1.5.1",
+    "rimraf": "^3.0.2",
+    "supertest": "^6.1.3",
+    "supertest-allure-step-helper": "^0.1.1",
+    "ts-node": "^9.1.1",
+    "ts-test-decorators": "0.0.6",
+    "tslib": "^2.1.0",
+    "typescript": "^4.1.5"
+  },
+  "dependencies": {
+    "@apidevtools/swagger-parser": "^10.0.2",
+    "extend": "^3.0.2",
+    "jsonschema": "^1.4.0",
+    "watch": "^1.0.2"
+  }
+}
