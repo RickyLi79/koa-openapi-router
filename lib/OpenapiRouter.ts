@@ -211,8 +211,10 @@ export class OpenapiRouter {
         if (!actionInfo.action) {
           func = qry.path;
           actionInfo.action = ctl[func];
-        } else {
-          func = '';
+        }
+
+        if (!actionInfo.action) {
+          func = qry.method.toUpperCase() + ' ' + qry.path;
         }
         actionInfo.func = func;
       } catch (e) {
@@ -417,9 +419,9 @@ export class OpenapiRouter {
         this.addRouter(opt, iMethod, iPath2);
         // const fullOpt = `${iMethod.toUpperCase()} ${this.routerPrefix}${iPath2}`;
         if (actionInfo.action !== undefined) {
-          this.logger.debug(`openapi-router connected : opt='${opt}' in ${actionInfo.file}#'${actionInfo.func}'`);
+          this.logger.debug(`openapi-router connected : method='${iMethod.toUpperCase()}' path='${this.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
         } else {
-          this.logger.error(`Can not connnect router : opt='${opt}' in ${actionInfo.file}#'${actionInfo.func}'`);
+          this.logger.error(`Can not connnect router : method='${iMethod.toUpperCase()}' path='${this.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
         }
       }
     }
