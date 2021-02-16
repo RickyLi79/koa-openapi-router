@@ -2,7 +2,6 @@
   "name": "koa-openapi-router",
   "version": "1.0.0",
   "description": "config koa-router by openapi, valid the request by opanapi",
-  "typings": "typings",
   "scripts": {
     "mocha:debug": "mocha -R mocha-multi-reporters --reporter-options configFile=mocha-multi-reporters.json --timeout 1000000 --colors --require ts-node/register allure.test/debug.ts",
     "dev:debug": "node --require ts-node/register dev/debug.ts",

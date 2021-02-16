@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as watch from 'watch';
 import { FileOrFiles } from 'watch';
 import OpenapiRouterAction from './OpenapiRouterAction';
-import defaultOpenapiRouterConfig from './OpenapiRouterConfig';
+import { defaultOpenapiRouterConfig } from './OpenapiRouterConfig';
 import { ILogger, IOpenapiRouterConfig as OpenapiRouterConfig, IOpenapiRouterFactoryConfig as OpenapiRouterFactoryConfig, IOptionalOpenapiRouterConfig as OptionalOpenapiRouterConfig, KoaControllerAction } from './types';
 
 const OPENAPI_ROUTER_LOGGER = Symbol('OpenapiRouter#openapiRouterLogger');

@@ -21,12 +21,13 @@
     // "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "inlineSourceMap": true,
+    // "inlineSourceMap": true,
     "importHelpers": true,
     "esModuleInterop": true
   },
   "exclude": [
     "node_modules*",
-    "allure.test"
+    "allure.test",
+    "example"
   ]
 }
