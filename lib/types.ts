@@ -54,6 +54,9 @@ export type IOpenapiRouterConfig = {
 
   proxyAction?: KoaControllerAction,
 
+  /**
+   * @private
+   */
   test: {
     enabled: boolean;
     controllerFileExt: '.ts' | '.js'
