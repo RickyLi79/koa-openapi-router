@@ -1,7 +1,6 @@
 /* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as jsonschema from 'jsonschema';
-import { Schema } from 'jsonschema';
 import { Next } from 'koa';
 import Router from 'koa-router';
 import { OpenapiRouter, X_OAS_VER } from './OpenapiRouter';
@@ -79,9 +78,10 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
               break;
           }
 
+
           if (para !== undefined) {
             try {
-              jsonschema.validate(para, iOpt.schema, { throwFirst: true, throwError: true, rewrite, preValidateProperty });
+              jsonschema.validate(para, iOpt.schema, { throwFirst: true, throwError: true });
             } catch (err) {
               ctx.status = 422;
               const e: jsonschema.ValidationError = err.errors[0];
@@ -121,25 +121,29 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
         }
 
         const ctxContentType = ctx.request.get('content-type');
-        if (acceptContentTypes[ctxContentType]) {
-          contentType = ctxContentType;
-        } else {
-          for (const iContentType in acceptContentTypes) {
-            if (ctx.is(iContentType) !== false) {
-              contentType = iContentType;
-              break;
+        if (acceptContentTypes) {
+          if (acceptContentTypes[ctxContentType]) {
+            contentType = ctxContentType;
+          } else {
+            for (const iContentType in acceptContentTypes) {
+              if (ctx.is(iContentType) !== false) {
+                contentType = iContentType;
+                break;
+              }
             }
           }
         }
 
         if (!contentType && requestBodyRequired && acceptContentTypes) {
-          ctx.status = 415;
-          return;
+          if (acceptContentTypes || ctxContentType) {
+            ctx.status = 415;
+            return;
+          }
         }
-        if (!contentType && ctxContentType) {
-          ctx.status = 415;
-          return;
-        }
+        // if (!contentType && ctxContentType) {
+        //   ctx.status = 415;
+        //   return;
+        // }
         const reqBodySchema = doc_ver === 2 ? bodySchema : operation.requestBody?.content[contentType!]?.schema;
         if (Object.keys(ctx.request.body).length === 0) {
           if (requestBodyRequired !== true) {
@@ -151,7 +155,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
           }
         } else if (reqBodySchema) {
           try {
-            jsonschema.validate(ctx.request.body, reqBodySchema, { throwError: true, throwFirst: true, rewrite, preValidateProperty });
+            jsonschema.validate(ctx.request.body, reqBodySchema, { throwError: true, throwFirst: true });
           } catch (err) {
             ctx.status = 422;
             const e: jsonschema.ValidationError = err.errors[0];
@@ -216,13 +220,15 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
             }
 
             const ctxContentType = ctx.response.get('content-type');
-            if (responseContentTypes[ctxContentType]) {
-              contentType = ctxContentType;
-            } else {
-              for (const iContentType in responseContentTypes) {
-                if (ctx.response.is(iContentType) !== false) {
-                  contentType = iContentType;
-                  break;
+            if (responseContentTypes) {
+              if (responseContentTypes[ctxContentType]) {
+                contentType = ctxContentType;
+              } else {
+                for (const iContentType in responseContentTypes) {
+                  if (ctx.response.is(iContentType) !== false) {
+                    contentType = iContentType;
+                    break;
+                  }
                 }
               }
             }
@@ -255,7 +261,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
         }
 
         ctx.response.set(TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '200');
-      // eslint-disable-next-line no-constant-condition
+        // eslint-disable-next-line no-constant-condition
       } while (false);
 
       if (config.test.enabled) {
@@ -267,6 +273,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
   };
 }
 
+/*
 function preValidateProperty(instance: any, _key: string, schema: Schema): any {
   if (typeof instance === 'string' && schema.type) {
     let result: number;
@@ -309,3 +316,4 @@ function rewrite(instance: any, schema: Schema): any {
   }
   return instance;
 }
+ */

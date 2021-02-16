@@ -1,4 +1,3 @@
-
 import { suite, test } from '@testdeck/mocha';
 import { Severity } from 'allure-js-commons';
 import { allure } from 'allure-mocha/runtime';
@@ -14,7 +13,6 @@ import { OpenapiRouter } from '../../lib/OpenapiRouter';
 import { TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS } from '../../lib/Test-Response-Header';
 import { IOptionalOpenapiRouterConfig } from '../../lib/types';
 import { MutedLogger, TestStore } from '../TestStore';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { docsFile_valid_res_body_oas2_json } from './docs/docsPath';
 
 let defaultOpenapiRouterConfig: IOptionalOpenapiRouterConfig;

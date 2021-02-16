@@ -12,7 +12,6 @@ import * as allureDecorators from 'ts-test-decorators';
 import { OpenapiRouter } from '../../lib/OpenapiRouter';
 import { IOptionalOpenapiRouterConfig } from '../../lib/types';
 import { MutedLogger, TestStore } from '../TestStore';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { docsFile_valid_req_contentType_oas2_json } from './docs/docsPath';
 
 
@@ -74,7 +73,7 @@ export class TestSuite {
     TestSuite.server.removeAllListeners();
   }
 
-  protected createAllureAgentProxy(url?:string) {
+  protected createAllureAgentProxy(url?: string) {
     const agent = supertest.agent(url ?? TestSuite.server);
     TestSuite.allureAgentProxy = AllureStepProxy.create(agent);
     return TestSuite.allureAgentProxy!;
@@ -117,7 +116,7 @@ export class TestSuite {
         .stepName("`req.contentType` === 'application/json'")
         .get(url)
         .set('content-type', 'application/json')
-        .expect(415)
+        .expect(200)
         .endAllureStep();
     }
 
@@ -127,7 +126,7 @@ export class TestSuite {
         .stepName("`req.contentType` === 'html/text'")
         .get(url)
         .set('content-type', 'html/text')
-        .expect(415)
+        .expect(200)
         .endAllureStep();
     }
 
@@ -180,7 +179,7 @@ export class TestSuite {
         .stepName(" `req.contentType` === 'html/text'")
         .post(url)
         .set('content-type', 'html/text')
-        .expect(415)
+        .expect(200)
         .endAllureStep();
     }
 

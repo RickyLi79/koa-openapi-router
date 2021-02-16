@@ -74,11 +74,12 @@ export class TestSuite {
     TestSuite.server.removeAllListeners();
   }
 
-  protected createAllureAgentProxy(url?:string) {
+  protected createAllureAgentProxy(url?: string) {
     const agent = supertest.agent(url ?? TestSuite.server);
     TestSuite.allureAgentProxy = AllureStepProxy.create(agent);
     return TestSuite.allureAgentProxy!;
   }
+
 
   @allureDecorators.severity(Severity.NORMAL)
   @test('valid.request : no `req.contentType` required')
@@ -117,7 +118,7 @@ export class TestSuite {
         .stepName("`req.contentType` === 'application/json'")
         .get(url)
         .set('content-type', 'application/json')
-        .expect(415)
+        .expect(200)
         .endAllureStep();
     }
 
@@ -127,7 +128,7 @@ export class TestSuite {
         .stepName("`req.contentType` === 'html/text'")
         .get(url)
         .set('content-type', 'html/text')
-        .expect(415)
+        .expect(200)
         .endAllureStep();
     }
 
@@ -180,7 +181,7 @@ export class TestSuite {
         .stepName(" `req.contentType` === 'html/text'")
         .post(url)
         .set('content-type', 'html/text')
-        .expect(415)
+        .expect(200)
         .endAllureStep();
     }
 

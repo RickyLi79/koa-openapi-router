@@ -8,14 +8,13 @@ import bodyParser from 'koa-bodyparser';
 import Router from 'koa-router';
 import path from 'path';
 import supertest, { SuperAgentTest } from 'supertest';
+import { AllureStepProxy } from 'supertest-allure-step-helper';
+import { attachmentJson, attachmentJsonByObj, attachmentUtf8FileAuto, runStep } from 'supertest-allure-step-helper/helpers/AllureHelper';
 import * as allureDecorators from 'ts-test-decorators';
 import { OpenapiRouter } from '../../lib/OpenapiRouter';
 import { IOptionalOpenapiRouterConfig } from '../../lib/types';
-import { docsDir, docsFile_create_oas3_json, docsFile_valid_req_para_oas3_json, docsFile_valid_req_body_oas3_yaml } from './docs/docsPath';
 import { MutedLogger, TestStore } from '../TestStore';
-import { attachmentJson, attachmentJsonByObj, attachmentUtf8FileAuto, runStep } from 'supertest-allure-step-helper/helpers/AllureHelper';
-import { AllureStepProxy } from 'supertest-allure-step-helper';
-
+import { docsDir, docsFile_create_oas3_json, docsFile_valid_req_body_oas3_yaml, docsFile_valid_req_para_oas3_json } from './docs/docsPath';
 
 let defaultOpenapiRouterConfig: IOptionalOpenapiRouterConfig;
 

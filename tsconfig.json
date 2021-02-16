@@ -11,8 +11,6 @@
     "allowJs": false,
     "pretty": true,
     "noEmitOnError": false,
-    // "declaration": true,
-    // "declarationDir": "typings",
     // "noUnusedLocals": false,
     // "noUnusedParameters": true,
     // "allowUnreachableCode": false,

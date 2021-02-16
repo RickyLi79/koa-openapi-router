@@ -5,7 +5,7 @@ import bodyParser from 'koa-bodyparser';
 import Router from 'koa-router';
 import path from 'path';
 import supertest from 'supertest';
-import { runStep, config, writePackageVerToEnvironmentInfo } from 'supertest-allure-step-helper/helpers/AllureHelper';
+import { config, runStep, writePackageVerToEnvironmentInfo } from 'supertest-allure-step-helper/helpers/AllureHelper';
 import * as allureDecorators from 'ts-test-decorators';
 import { OpenapiRouter } from '../lib/OpenapiRouter';
 import { ILogger, IOptionalOpenapiRouterConfig } from '../lib/types';
@@ -15,23 +15,22 @@ import { docsFile_create_oas3_json } from './suite/docs/docsPath';
 const SUITE_COUNTER = Symbol('TestStoreStatic#suiteCounter');
 const ALLURE_INITED = Symbol('TestStoreStatic#allureInited');
 
-
 export class MutedLogger implements ILogger {
   errorMsg: any[] = [];
   error(msg: any, ...args: any[]): void {
-    this.addMsg(this.errorMsg, [msg, ...args]);
+    this.addMsg(this.errorMsg, [ msg, ...args ]);
   }
   warnMsg: any[] = [];
   warn(msg: any, ...args: any[]): void {
-    this.addMsg(this.warnMsg, [msg, ...args]);
+    this.addMsg(this.warnMsg, [ msg, ...args ]);
   }
   infoMsg: any[] = [];
   info(msg: any, ...args: any[]): void {
-    this.addMsg(this.infoMsg, [msg, ...args]);
+    this.addMsg(this.infoMsg, [ msg, ...args ]);
   }
   debugMsg: any[] = [];
   debug(msg: any, ...args: any[]): void {
-    this.addMsg(this.debugMsg, [msg, ...args]);
+    this.addMsg(this.debugMsg, [ msg, ...args ]);
   }
 
   protected readonly maxMsgLen = 100;
@@ -61,7 +60,7 @@ class TestStoreStatic {
       allureDecorators.decorate<any>(allure);
       config.baseDir = path.join(__dirname, 'suite');
 
-      writePackageVerToEnvironmentInfo(process.cwd(), ['koa', 'koa-bodyparser', 'koa-router', 'supertest', 'jsonschema', '@apidevtools/swagger-parser']);
+      writePackageVerToEnvironmentInfo(process.cwd(), [ 'koa', 'koa-bodyparser', 'koa-router', 'supertest', 'jsonschema', '@apidevtools/swagger-parser' ]);
 
       OpenapiRouter.logger = new MutedLogger();
       const testConfig: IOptionalOpenapiRouterConfig = {
