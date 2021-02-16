@@ -214,6 +214,7 @@ export class OpenapiRouter {
         } else {
           func = '';
         }
+        actionInfo.func = func;
       } catch (e) {
         // this.logger.error(e);
       }
@@ -416,9 +417,9 @@ export class OpenapiRouter {
         this.addRouter(opt, iMethod, iPath2);
         // const fullOpt = `${iMethod.toUpperCase()} ${this.routerPrefix}${iPath2}`;
         if (actionInfo.action !== undefined) {
-          this.logger.debug(`openapi-router connected : opt='${opt}' in ${actionInfo.file}#${actionInfo.func}`);
+          this.logger.debug(`openapi-router connected : opt='${opt}' in ${actionInfo.file}#'${actionInfo.func}'`);
         } else {
-          this.logger.error(`Can not connnect router : opt='${opt}' in ${actionInfo.file}#${actionInfo.func} `);
+          this.logger.error(`Can not connnect router : opt='${opt}' in ${actionInfo.file}#'${actionInfo.func}'`);
         }
       }
     }
