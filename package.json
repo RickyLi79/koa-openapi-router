@@ -1,5 +1,5 @@
 {
-  "name": "koa-openapi-router",
+  "name": "@rickyli79/koa-openapi-router",
   "version": "1.0.0",
   "description": "config koa-router by openapi, valid the request by opanapi",
   "scripts": {
