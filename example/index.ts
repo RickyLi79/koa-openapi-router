@@ -1,5 +1,5 @@
 import Koa from 'koa';
-import { getConfig, OpenapiRouter } from 'koa-openapi-router';
+import { getConfig, OpenapiRouter } from '@rickyli79/koa-openapi-router';
 import Router from 'koa-router';
 import bodyparser from 'koa-bodyparser';
 import path from 'path';

@@ -13,9 +13,9 @@
     "typescript": "^4.1.5"
   },
   "dependencies": {
+    "@rickyli79/koa-openapi-router": "^1.0.0",
     "koa": "^2.13.1",
     "koa-bodyparser": "^4.3.0",
-    "koa-openapi-router": "git+https://github.com/RickyLi79/koa-openapi-router.git",
     "koa-router": "^10.0.0"
   }
 }

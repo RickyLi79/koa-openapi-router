@@ -26,5 +26,5 @@ npm i -S @rickyli79/koa-openapi-router
 [Example](./example)
 
 #### 测试报告
-- [Allure Report](https://rickyli79.github.io/testing-reports/koa-openapi-router/allure-report/)
+- [Allure Report](https://rickyli79.gitee.io/testing-reports/koa-openapi-router/allure-report/)
 

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const koa_1 = tslib_1.__importDefault(require("koa"));
-const koa_openapi_router_1 = require("koa-openapi-router");
+const koa_openapi_router_1 = require("@rickyli79/koa-openapi-router");
 const koa_router_1 = tslib_1.__importDefault(require("koa-router"));
 const koa_bodyparser_1 = tslib_1.__importDefault(require("koa-bodyparser"));
 const path_1 = tslib_1.__importDefault(require("path"));
