@@ -1,9 +1,9 @@
 # @rickyli79/koa-openapi-router
-English | [[简体中文]](../../README.zh-CN.md)
+[[English]](../../README.md) | 简体中文
 
-[[Overview]][1] | [[Config]][2] | Controller | [[Validate]][4] | [[File Watcher]][5]
+[[总览]][1] | [[Config 配置]][2] | Controller 控制器 | [[Validate 校验]][4] | [[File Watcher 文件监控]][5]
 
-[1]:../../README.md
+[1]:../../README.zh-CN.md
 [2]:./Config.md
 [3]:./Controller.md
 [4]:./Validate.md
@@ -11,13 +11,14 @@ English | [[简体中文]](../../README.zh-CN.md)
 
 ---
 
-## Controller
-`OpenapiRouter` will try to locate Controller and calls the method.
+## Controller 控制器
+`OpenapiRouter` 会尝试通过约定规则定位Controller，并调用符合命名规则的method
 
-### controller file 
-`OpenapiRouter` will try to locate file by schema `tags[0]`. if `tags[0]` not given, will locate `default.js`
+### controller命名规则
+`OpenapiRouter` 会通过每个`path`中的`x-controller`/`tags[0]`定位控制器文件。
+如果没有`x-controller`也没有`tags[0]`, 则会寻找`default.js`。
 
-#### example : controller file 
+#### 例子 : controller file 控制器文件命名规则 
 ```yaml
   openapi: 3.0.0
   paths:
@@ -45,10 +46,10 @@ app-root
         └── ctl-2.js  // method 'GET /the/path/2' should be found here
 ```
 
-### method name in controller
-`OpenapiRouter` will calls first aviable method named `"GET /my/path"` / `"ALL /my/path"` / `"/my/path"` in controller file
+### method命名规则
+`OpenapiRouter` 会依次尝试调用控制器中第一个可用的method: `"GET /my/path"` / `"ALL /my/path"` / `"/my/path"`
 
-#### example : method name in controller
+#### 例子 : method命名规则
 ```yaml
   opeanapi: 3.0.0
   ...
@@ -63,13 +64,13 @@ app-root
   ```js
   // {contorller}/my/tag.js
   exports['GET /my/path'] = async ctx => {
-    // will be called first
+    // 会第一个被尝试调用
   };
   exports['ALL /my/path'] = async ctx => {
-    // will be called if 'GET /my/path' not exists
+    // 如果'GET /my/path'不存在，则会调用该method
   };
   exports['/my/path'] = async ctx => {
-    // will be called if 'GET /my/path' and 'ALL /my/path' not exists
+    // 如果'GET /my/path'和'ALL /my/path'不存在，则会调用该method
   };
   ```
 
@@ -80,22 +81,22 @@ app-root
 
   export default class {
     async 'GET /my/path'(ctx: IRouterContext) {
-      // will be called first
+      // 会第一个被尝试调用
     }
 
     async 'ALL /my/path'(ctx: IRouterContext) {
-      // will be called if 'GET /my/path' not exists
+      // 如果'GET /my/path'不存在，则会调用该method
     }
 
     async '/my/path'(ctx: IRouterContext) {
-      // will be called if 'GET /my/path' and 'ALL /my/path' not exists
+      // 如果'GET /my/path'和'ALL /my/path'不存在，则会调用该method
     }
 
   }
   ```
 
-#### `path` method name
-OpenApi-doc expample :
+#### `path` method 的特殊命名规则
+OpenApi-doc 示例 :
 ```yaml
   opeanapi: 3.0.0
   ...
@@ -105,32 +106,32 @@ OpenApi-doc expample :
       tags:
         - pets
 ```
-`OpenapiRouter` will calls `'GET /pets/:petId'`.
+`OpenapiRouter` 将会寻找method: `'GET /pets/:petId'`。
 
-`'GET /pets/{petId}'` will never be called.
+`'GET /pets/{petId}'` 是不符合约定的命名，将永远不会被尝试调用。
 
-controller code example :
+controller代码示例 :
 ```ts
 // {contorller}/pets.ts
 import { IRouterContext } from 'koa-router';
 export default class {
   async 'GET /pets/:petId'(ctx: IRouterContext) {
-    // correct method name
+    // 正确的method命名
   }
 
   async 'GET /pets/{petId}'(ctx: IRouterContext) {
-    throw new Error('incorrect method name')
+    throw new Error('不符合约定的method命名')
   }
 }
 ```
 
-### check the logger
-if not sure controller file and method name. logger will tells the correct way.
-- success logger example :
+### 通过logger确认是否命名正确、
+如果无法确定controller和method是否命名正确，可通过logger给出的信息进行调整。
+- 命名正确的logger信息 :
   ```
   openapi-router connected success : method='POST' path='/my/api/hello' from >   default.js#'POST /hello'
   ```
-- failed logger example :
+- 命名错误导致失败的logger信息 :
   ```  
   openapi-router connect failed : method='GET' path='/my/api/nihao' from >   default.js#'GET /nihao'
   ```

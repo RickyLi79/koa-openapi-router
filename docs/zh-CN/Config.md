@@ -1,18 +1,18 @@
 # @rickyli79/koa-openapi-router
-English | [[简体中文]](../../README.zh-CN.md)
+[[English]](../../README.md) | 简体中文
 
-[[Overview]][1] | Config | [[Controller]][3] | [[Validate]][4] | [[File Watcher]][5]
+[[总览]][1] | Config 配置 | [[Controller 控制器]][3] | [[Validate 校验]][4] | [[File Watcher 文件监控]][5]
 
-[1]:../../README.md
+[1]:../../README.zh-CN.md
 [2]:./Config.md
 [3]:./Controller.md
 [4]:./Validate.md
 [5]:./FileWatcher.md
 
 ---
-## Config
+## Config 配置 
 
-#### Definition
+#### 定义
 ```ts
 export type IOpenapiRouterConfig = {
   /**
@@ -80,7 +80,7 @@ export type IOpenapiRouterConfig = {
 };
 ```
 
-#### Init by `getConfig()`
+#### 通过`getConfig()`初始化
 ```ts
 import { getConfig } from 'koa-openapi-router';
 const config = getConfig({
@@ -89,7 +89,7 @@ const config = getConfig({
 });
 ```
 
-#### Init by `new ()`
+#### 通过`new ()`初始化
 ```ts
 import { OpenapiRouter } from 'koa-openapi-router';
 const router = new Router();
@@ -106,7 +106,7 @@ app.use(router.routes());  // same as : app.use(openapiRouter.getRouter().routes
  */
 app.use(router.allowedMethods());
 ```
-#### Init by `OpenapiRouter.Start()`
+#### 通过工厂方法`OpenapiRouter.Start()`初始化
 ```ts
 import { OpenapiRouter } from 'koa-openapi-router';
 // ... app init

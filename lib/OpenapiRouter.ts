@@ -3,7 +3,7 @@ import SwaggerParser from '@apidevtools/swagger-parser';
 import extend from 'extend';
 import * as fs from 'fs';
 import Koa from 'koa';
-import Router from 'koa-router';
+import Router, { IRouterOptions } from 'koa-router';
 import * as path from 'path';
 import * as watch from 'watch';
 import { FileOrFiles } from 'watch';
@@ -14,6 +14,7 @@ import { ILogger, IOpenapiRouterConfig as OpenapiRouterConfig, IOpenapiRouterFac
 const OPENAPI_ROUTER_LOGGER = Symbol('OpenapiRouter#openapiRouterLogger');
 const OPENAPI_ROUTER_MIDDLEWARE = Symbol('OpenapiRouter#openapiRouterMiddlerware');
 export const X_OAS_VER = 'x-oas-ver';
+const X_CONTROLLER = 'x-controller';
 
 type KoaControllerActionInfo = { file: string, func: string, action?: KoaControllerAction };
 
@@ -32,6 +33,9 @@ export class OpenapiRouter {
   private optInDoc: { [doc: string]: string[] };// 单个api文档中包含的所有operation
 
   private operationMap: { [opt: string]: OperationSchema };// 整个router中已注册的url所对应的schema
+  /**
+   * @private
+   */
   public getOperationByOpt(opt: string) {
     return this.operationMap[opt];
   }
@@ -48,14 +52,19 @@ export class OpenapiRouter {
   }
 
   public readonly config: OpenapiRouterConfig;
-  public constructor(router: Router, config: OptionalOpenapiRouterConfig) {
-    this._router = router;
+
+  public constructor(router: Router | IRouterOptions, config: OptionalOpenapiRouterConfig) {
+
+    this._router = (router instanceof Router) ? router : new Router(router);
     this.config = extend(true, {}, defaultOpenapiRouterConfig, config);
 
-    this.proxyAction = this.config.proxyAction;
+    this.proxyAction = config.proxyAction;
     OpenapiRouter._openapiRouters.push(this);
   }
 
+  /**
+   * dispose all working OpenapiRouter
+   */
   public static closeAll() {
     while (this._openapiRouters.length > 0) {
       const iOr = this._openapiRouters.shift();
@@ -171,13 +180,22 @@ export class OpenapiRouter {
 
   // #endregion
 
+  /**
+   * if set, all request will lead to this method.
+   *
+   * set `undefined` to resume normal mode
+   */
   public proxyAction?: KoaControllerAction;
   private koaControllerActionMap: { [opt: string]: KoaControllerActionInfo } = {};
+
+  /**
+   * @private
+   */
   public getKoaControllerAction(opt: string, qry?: { method: string, path: string }): KoaControllerActionInfo {
     if (this.proxyAction) {
       return {
         file: '---',
-        func: '*proxy action*',
+        func: '<proxy action>',
         action: this.proxyAction,
       };
     }
@@ -188,7 +206,7 @@ export class OpenapiRouter {
 
     const operation: any = this.getOperationByOpt(opt);
     {
-      const tag = operation.tags?.[0] ?? 'default';
+      const tag = operation[X_CONTROLLER] ?? operation.tags?.[0] ?? 'default';
       actionInfo = { file: tag + '.js', func: '' };
       let ctl: any;
       try {
@@ -216,7 +234,10 @@ export class OpenapiRouter {
         if (!actionInfo.action) {
           func = qry.method.toUpperCase() + ' ' + qry.path;
         }
-        actionInfo.func = func;
+
+        if (typeof func === 'function') {
+          actionInfo.func = func;
+        }
       } catch (e) {
         // this.logger.error(e);
       }
@@ -224,6 +245,10 @@ export class OpenapiRouter {
     this.koaControllerActionMap[opt] = actionInfo;
     return actionInfo;
   }
+
+  /**
+   * @private
+   */
   public getKoaControllerActionFile(opt: string) {
     const operation: any = this.getOperationByOpt(opt);
     const tag = operation.tags?.[0] ?? 'default';
@@ -235,8 +260,10 @@ export class OpenapiRouter {
   private watchMonitor: watch.Monitor;
   private watchMonitorOutter: watch.Monitor;
   /**
-       * 重新扫描读取openapi文档
-       */
+   * 重新扫描读取openapi文档
+   *
+   * load/reload OpenApi-doc
+   */
   public async loadOpenapi() {
     return new Promise<boolean>((resolve, rejects) => {
       let docsDir = this.config.docsDir;
@@ -246,7 +273,7 @@ export class OpenapiRouter {
         rejects(err);
       }
 
-      this.close();
+      this.close(false);
 
       const handler = (f: FileOrFiles, curr: fs.Stats, prev: fs.Stats) => {
         if (curr.isDirectory()) {
@@ -265,12 +292,14 @@ export class OpenapiRouter {
         }
       };
 
-      this.logger.debug(`watch dir : ${docsDir}`);
 
       let docFilename = '';
       if (fs.statSync(docsDir).isFile()) {
         docFilename = docsDir;
         docsDir = path.dirname(docFilename);
+        this.logger.info(`scan file : ${docsDir}`);
+      } else {
+        this.logger.info(`scan dir : ${docsDir}`);
       }
 
       watch.createMonitor(docsDir,
@@ -301,6 +330,7 @@ export class OpenapiRouter {
           if (!this.config.watcher.enabled) {
             watch.unwatchTree(docsDir);
           } else {
+            this.logger.info(`file watcher enabled : ${docsDir}`);
             monitor.setMaxListeners(100);
             monitor.on('changed', handler).on('created', handler).on('created', handler);
           }
@@ -311,7 +341,10 @@ export class OpenapiRouter {
     });
   }
 
-  public close() {
+  /**
+   * dispose current OpeanapiRouter
+   */
+  public close(dispose = true) {
     // reset
     this.watchMonitor?.stop();
     // watch.unwatchTree(docsDir);
@@ -319,6 +352,7 @@ export class OpenapiRouter {
     this.operationMap = {};
     this.docsRefs = {};
     this.optInDoc = {};
+    if (dispose) { this.proxyAction = undefined; }
     for (const iFilename of this.wactchingFile.values()) {
       OpenapiRouter.unwatchOutterFile(this, iFilename);
     }

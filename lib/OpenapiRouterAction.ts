@@ -7,6 +7,12 @@ import { OpenapiRouter, X_OAS_VER } from './OpenapiRouter';
 import { TEST_RESPONSE_HEADER_CONTROLLER_FILE, TEST_RESPONSE_HEADER_REQUEST_SCHEMA, TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS } from './Test-Response-Header';
 import { OperationSchema, OPERATION_SCHEMA, Schema } from './types';
 
+declare module 'koa-router'{
+  interface IRouterContext{
+    getOperation():OperationSchema;
+    getRequestBodySchema():Schema;
+  }
+}
 
 const OPEANAPI_PREFIX = 'x-openapi-';
 
@@ -33,7 +39,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
     }
 
     const config = openapiRouter.config;
-    const action = openapiRouter.getKoaControllerAction(opt);
+    const actionInfo = openapiRouter.getKoaControllerAction(opt);
     if (config.test.enabled) {
       const controllerFile = openapiRouter.getKoaControllerActionFile(opt) + config.test.controllerFileExt;
       ctx.set(TEST_RESPONSE_HEADER_CONTROLLER_FILE, controllerFile);
@@ -41,7 +47,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
       ctx.set(TEST_RESPONSE_HEADER_REQUEST_SCHEMA, JSON.stringify(operation));
     }
 
-    if (action.action === undefined) {
+    if (actionInfo.action === undefined) {
       ctx.status = 501;
       return;
     }
@@ -181,7 +187,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
     ctx[CTX_OPERATION_SCHEMA] = operation;
     ctx.getOperation = getOperation.bind(ctx);
     ctx.getRequestBodySchema = getRequestBodySchema.bind(ctx);
-    await action.action!(ctx, next);
+    await actionInfo.action!(ctx, next);
 
     if (config.validSchema.reponse) {
       do {

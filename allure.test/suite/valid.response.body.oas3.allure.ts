@@ -84,16 +84,16 @@ export class TestSuite {
   @test('valid.response : no `response.body` schema')
   public async test1() {
 
-    const url = '/valid/response/body';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/response/body';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('expect(404)')
-        .get(url)
+        .get(toPath)
         .expect(404)
         .endAllureStep();
     }
@@ -107,7 +107,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('no `response.body`')
-        .get(url)
+        .get(toPath)
         .expect(200)
         .expectHeader(TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '415')
         .endAllureStep();
@@ -119,16 +119,16 @@ export class TestSuite {
   @test('valid.response : `response.body` valid')
   public async test2() {
 
-    const url = '/valid/response/body';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/response/body';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('expect(404)')
-        .post(url)
+        .post(toPath)
         .expect(404)
         .endAllureStep();
     }
@@ -142,7 +142,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('`response.body` valid')
-        .post(url)
+        .post(toPath)
         .expect(200)
         .expectHeader(TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '200')
         .endAllureStep();
@@ -154,16 +154,16 @@ export class TestSuite {
   @test('valid.response : `response.body` invalid')
   public async test3() {
 
-    const url = '/valid/response/body';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/response/body';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('expect(404)')
-        .patch(url)
+        .patch(toPath)
         .expect(404)
         .endAllureStep();
     }
@@ -177,7 +177,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('`response.body` invalid')
-        .patch(url)
+        .patch(toPath)
         .expect(200)
         .expectHeader(TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '422')
         .endAllureStep();

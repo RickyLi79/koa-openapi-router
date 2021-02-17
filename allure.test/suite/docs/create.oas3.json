@@ -14,9 +14,22 @@
         }
       }
     },
-    "/path/of/api1": {
+    "/path0/of/api1": {
       "get": {
         "description": "no tags",
+        "responses": {
+          "default": {
+            "description": "default"
+          }
+        }
+      }
+    },
+    "/path1/of/api1": {
+      "get": {
+        "tags": [
+          "tag1"
+        ],
+        "description": "has `tags[0]`",
         "responses": {
           "default": {
             "description": "default"
@@ -27,9 +40,10 @@
     "/path2/of/api1": {
       "get": {
         "tags": [
-          "tag1"
+          "tagX"
         ],
-        "description": "has `tags[0]`",
+        "x-controller": "tag1",
+        "description": "has `x-controller, `has `tags[0]`",
         "responses": {
           "default": {
             "description": "default"

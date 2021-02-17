@@ -1,8 +1,12 @@
 import { RouterContext } from 'koa-router';
 
 export default class {
-  async 'GET /path/of/api1'(ctx:RouterContext) {
-    ctx.body = '/path/of/api1';
+  async 'GET /path0/of/api1'(ctx:RouterContext) {
+    ctx.body = '/path0/of/api1';
+  }
+
+  async 'GET /path1/of/api1'(ctx:RouterContext) {
+    ctx.body = 'never';
   }
 
   async 'GET /path2/of/api1'(ctx:RouterContext) {

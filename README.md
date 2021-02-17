@@ -1,22 +1,28 @@
 # @rickyli79/koa-openapi-router
+English | [[简体中文]](./README.zh-CN.md)
+
+Overview | [[Config]][2] | [[Controller]][3] | [[Validate]][4] | [[File Watcher]][5]
+
+[1]:README.md
+[2]:./docs/en/Config.md
+[3]:./docs/en/Controller.md
+[4]:./docs/en/Validate.md
+[5]:./docs/en/FileWatcher.md
+
+---
 
 #### Description
-- config koa-router by openapi
-- validate the request by opanapi
+- init `koa-router` and connect `controller` by Openapi-doc
+- validate the request and response by Openapi-doc
+- watch Openapi-doc changes, no need to reboot app. handy in develment environment
 
 #### Installation
-
 ```shell
 npm i -S @rickyli79/koa-openapi-router
 ```
 
 #### Usage Example
 [Example](./example)
-
-#### Usage Documents
-- [Config.md](./docs/en/Config.md)
-- [Controllers.md](./docs/en/Controllers.md)
-- [Validate.md](./docs/en/Validate.md)
 
 #### Test Report
 - [Allure Report](https://rickyli79.github.io/testing-reports/koa-openapi-router/allure-report/)

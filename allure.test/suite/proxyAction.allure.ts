@@ -82,15 +82,15 @@ export class TestSuite {
   @allureDecorators.severity(Severity.NORMAL)
   @test('set `proxyAction` by config')
   public async test1() {
-    const url = '/path/of/api1';
-    AllureHelper.runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/path0/of/api1';
+    AllureHelper.runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .expect(404)
         .endAllureStep();
     }
@@ -106,13 +106,13 @@ export class TestSuite {
           },
         });
       await OpenapiRouter.Start(TestSuite.app, { router: {}, config });
-      AllureHelper.attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
+      AllureHelper.attachmentUtf8FileAuto(config.docsDir);
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .expect(305)
         .expect('ok')
         .expectHeader('x-mark', 'proxyAction')
@@ -123,15 +123,15 @@ export class TestSuite {
   @allureDecorators.severity(Severity.NORMAL)
   @test('set `proxyAction` by code')
   public async test2() {
-    const url = '/path/of/api1';
-    AllureHelper.runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/path0/of/api1';
+    AllureHelper.runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .expect(404)
         .endAllureStep();
     }
@@ -146,9 +146,9 @@ export class TestSuite {
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .expect(200)
-        .expect(url)
+        .expect(toPath)
         .endAllureStep();
     }
 
@@ -163,7 +163,7 @@ export class TestSuite {
 
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .expect(305)
         .expect('ok')
         .expectHeader('x-mark', 'proxyAction')
@@ -177,24 +177,24 @@ export class TestSuite {
 
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .expect(200)
-        .expect(url)
+        .expect(toPath)
         .endAllureStep();
     }
   }
   @allureDecorators.severity(Severity.NORMAL)
   @test('remove `proxyAction`')
   public async test3() {
-    const url = '/path/of/api1';
-    AllureHelper.runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/path0/of/api1';
+    AllureHelper.runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .expect(404)
         .endAllureStep();
     }
@@ -209,9 +209,9 @@ export class TestSuite {
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .expect(200)
-        .expect(url)
+        .expect(toPath)
         .endAllureStep();
     }
 
@@ -226,7 +226,7 @@ export class TestSuite {
 
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .expect(305)
         .expect('ok')
         .expectHeader('x-mark', 'proxyAction')
@@ -240,9 +240,9 @@ export class TestSuite {
 
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .expect(200)
-        .expect(url)
+        .expect(toPath)
         .endAllureStep();
     }
   }

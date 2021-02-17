@@ -87,15 +87,15 @@ export class TestSuite {
 
     const p1 = Math.random().toFixed(3);
     const p2 = Math.random().toFixed(3);
-    const url = `/valid/request/path/${p1}/${p2}`;
-    runStep(`set URL='${url}', p1=${p1}, p2=${p2}`, () => {
-      return url;
+    const toPath = `/valid/request/path/${p1}/${p2}`;
+    runStep(`set : toPath='${toPath}', p1=${p1}, p2=${p2}`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .expect(404)
         .endAllureStep();
     }
@@ -105,11 +105,11 @@ export class TestSuite {
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
 
-    const url2 = url + '/abc';
+    const toPath2 = toPath + '/abc';
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url2)
+        .get(toPath2)
         .expect(404)
         .endAllureStep();
 
@@ -118,7 +118,7 @@ export class TestSuite {
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .expect(200)
         .endAllureStep();
 
@@ -138,16 +138,16 @@ export class TestSuite {
   @test('valid.request : required `header`')
   public async test1() {
 
-    const url = '/valid/request/header';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/request/header';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('expect(404)')
-        .get(url)
+        .get(toPath)
         .set('h1', 'any')
         .expect(404)
         .endAllureStep();
@@ -161,7 +161,7 @@ export class TestSuite {
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .expect(422)
         .endAllureStep();
     }
@@ -170,7 +170,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('valid `header`')
-        .get(url)
+        .get(toPath)
         .set('h1', 'any')
         .expect(200)
         .endAllureStep();
@@ -180,7 +180,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('invalid `header`')
-        .get(url)
+        .get(toPath)
         .set('h1', 'a too long text. length > maxLength')
         .expect(422)
         .endAllureStep();
@@ -191,14 +191,14 @@ export class TestSuite {
   @test('valid.request : optional `header`')
   public async test2() {
 
-    const url = '/valid/request/header';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/request/header';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .post(url)
+        .post(toPath)
         .set('h1', 'any')
         .expect(404)
         .endAllureStep();
@@ -213,7 +213,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('no `header`')
-        .post(url)
+        .post(toPath)
         .expect(200)
         .endAllureStep();
     }
@@ -222,7 +222,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('valid `header`')
-        .post(url)
+        .post(toPath)
         .set('h1', 'any')
         .expect(200)
         .endAllureStep();
@@ -232,7 +232,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('invalid `header`')
-        .post(url)
+        .post(toPath)
         .set('h1', 'a too long text. length > maxLength')
         .expect(422)
         .endAllureStep();
@@ -243,14 +243,14 @@ export class TestSuite {
   @test('valid.request : required `query`')
   public async test_3() {
 
-    const url = '/valid/request/query';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/request/query';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .query({ q1: 'any' })
         .expect(404)
         .endAllureStep();
@@ -265,7 +265,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('no `query`')
-        .get(url)
+        .get(toPath)
         .expect(422)
         .endAllureStep();
     }
@@ -274,7 +274,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('valid `query`')
-        .get(url)
+        .get(toPath)
         .query({ q1: 'any' })
         .expect(200)
         .endAllureStep();
@@ -284,7 +284,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('invalid `query`')
-        .get(url)
+        .get(toPath)
         .query({ q1: 'a too long text. length > maxLength' })
         .expect(422)
         .endAllureStep();
@@ -295,14 +295,14 @@ export class TestSuite {
   @test('valid.request : optional `query`')
   public async test4() {
 
-    const url = '/valid/request/query';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/request/query';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .post(url)
+        .post(toPath)
         .query({ q1: 'any' })
         .expect(404)
         .endAllureStep();
@@ -317,7 +317,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('invalid `query`')
-        .post(url)
+        .post(toPath)
         .query({ q1: 'any' })
         .expect(200)
         .endAllureStep();
@@ -327,7 +327,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('valid `query`')
-        .post(url)
+        .post(toPath)
         .query({ q1: 'any' })
         .expect(200)
         .endAllureStep();
@@ -337,7 +337,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('invalid `query`')
-        .post(url)
+        .post(toPath)
         .query({ q1: 'a too long text. length > maxLength' })
         .expect(422)
         .endAllureStep();
@@ -347,14 +347,14 @@ export class TestSuite {
   @test('valid.request : required `cookie`')
   public async test5() {
 
-    const url = '/valid/request/cookie';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/request/cookie';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .set('Cookie', 'c1=any')
         .expect(404)
         .endAllureStep();
@@ -369,7 +369,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('no `cookie`')
-        .get(url)
+        .get(toPath)
         .expect(422)
         .endAllureStep();
     }
@@ -377,7 +377,7 @@ export class TestSuite {
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .set('Cookie', 'c1=any')
         .expect(200)
         .endAllureStep();
@@ -387,7 +387,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('invalid `cookie`')
-        .get(url)
+        .get(toPath)
         .set('Cookie', 'c1=a too long text. length > maxLength')
         .expect(422)
         .endAllureStep();
@@ -398,14 +398,14 @@ export class TestSuite {
   @test('valid.request : optional `cookie`')
   public async test6() {
 
-    const url = '/valid/request/cookie';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/request/cookie';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .post(url)
+        .post(toPath)
         .set('Cookie', 'c1=any')
         .expect(404)
         .endAllureStep();
@@ -420,7 +420,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('no `cookie`')
-        .post(url)
+        .post(toPath)
         .expect(200)
         .endAllureStep();
     }
@@ -429,7 +429,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('valid `cookie`')
-        .post(url)
+        .post(toPath)
         .set('Cookie', 'c1=any')
         .expect(200)
         .endAllureStep();
@@ -439,7 +439,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('invalid `cookie`')
-        .post(url)
+        .post(toPath)
         .set('Cookie', 'c1=a too long text. length > maxLength')
         .expect(422)
         .endAllureStep();

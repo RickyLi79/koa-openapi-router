@@ -85,15 +85,15 @@ export class TestSuite {
   @test('valid.request : no `req.contentType` required')
   public async test1() {
 
-    const url = '/valid/request/contentType';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/request/contentType';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .get(url)
+        .get(toPath)
         .expect(404)
         .endAllureStep();
     }
@@ -107,7 +107,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('no `req.contentType`')
-        .get(url)
+        .get(toPath)
         .expect(200)
         .endAllureStep();
     }
@@ -116,7 +116,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName("`req.contentType` === 'application/json'")
-        .get(url)
+        .get(toPath)
         .set('content-type', 'application/json')
         .expect(200)
         .endAllureStep();
@@ -126,7 +126,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName("`req.contentType` === 'html/text'")
-        .get(url)
+        .get(toPath)
         .set('content-type', 'html/text')
         .expect(200)
         .endAllureStep();
@@ -138,15 +138,15 @@ export class TestSuite {
   @test('valid.request : `content-type` optional')
   public async test2() {
 
-    const url = '/valid/request/contentType';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/request/contentType';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .post(url)
+        .post(toPath)
         .expect(404)
         .endAllureStep();
     }
@@ -160,7 +160,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('no `req.contentType`')
-        .post(url)
+        .post(toPath)
         .expect(200)
         .endAllureStep();
     }
@@ -169,7 +169,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName(" `req.contentType` === 'application/json'")
-        .post(url)
+        .post(toPath)
         .set('content-type', 'application/json')
         .expect(200)
         .endAllureStep();
@@ -179,7 +179,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName(" `req.contentType` === 'html/text'")
-        .post(url)
+        .post(toPath)
         .set('content-type', 'html/text')
         .expect(200)
         .endAllureStep();
@@ -191,15 +191,15 @@ export class TestSuite {
   @test('valid.request : `content-type` required')
   public async test3() {
 
-    const url = '/valid/request/contentType';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/request/contentType';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .patch(url)
+        .patch(toPath)
         .expect(404)
         .endAllureStep();
     }
@@ -213,7 +213,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('no `req.contentType`')
-        .patch(url)
+        .patch(toPath)
         .expect(415)
         .endAllureStep();
     }
@@ -222,7 +222,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName(" `req.contentType` === 'application/json'")
-        .patch(url)
+        .patch(toPath)
         .set('content-type', 'application/json')
         .expect(422)
         .endAllureStep();
@@ -232,7 +232,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName(" `req.contentType` === 'html/text'")
-        .patch(url)
+        .patch(toPath)
         .set('content-type', 'html/text')
         .expect(415)
         .endAllureStep();

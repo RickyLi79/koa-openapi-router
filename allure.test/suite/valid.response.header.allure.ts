@@ -85,16 +85,16 @@ export class TestSuite {
   @test('valid.response : no `response.header` required')
   public async test1() {
 
-    const url = '/valid/response/header';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/response/header';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('expect(404)')
-        .get(url)
+        .get(toPath)
         .expect(404)
         .endAllureStep();
     }
@@ -108,7 +108,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('no `response.header`')
-        .get(url)
+        .get(toPath)
         .expect(200)
         .expectHeader(TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS, '200')
         .endAllureStep();
@@ -120,16 +120,16 @@ export class TestSuite {
   @test('valid.response : `response.header` optional, valid')
   public async test2() {
 
-    const url = '/valid/response/header';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/response/header';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('expect(404)')
-        .post(url)
+        .post(toPath)
         .expect(404)
         .endAllureStep();
     }
@@ -143,7 +143,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('valid `response.header`')
-        .post(url)
+        .post(toPath)
         .expect(200)
         .expectHeader(TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS, '200')
         .endAllureStep();
@@ -154,16 +154,16 @@ export class TestSuite {
   @test('valid.response : `response.header` optional, invalid')
   public async test3() {
 
-    const url = '/valid/response/header';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/response/header';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('expect(404)')
-        .patch(url)
+        .patch(toPath)
         .expect(404)
         .endAllureStep();
     }
@@ -177,7 +177,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('valid `response.header`')
-        .patch(url)
+        .patch(toPath)
         .expect(200)
         .expectHeader(TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS, '422')
         .endAllureStep();
@@ -188,16 +188,16 @@ export class TestSuite {
   @test('valid.response : `response.header` required, valid')
   public async test4() {
 
-    const url = '/valid/response/header';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/response/header';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('expect(404)')
-        .delete(url)
+        .delete(toPath)
         .expect(404)
         .endAllureStep();
     }
@@ -211,7 +211,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('valid `response.header`')
-        .delete(url)
+        .delete(toPath)
         .expect(200)
         .expectHeader(TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS, '200')
         .endAllureStep();
@@ -222,16 +222,16 @@ export class TestSuite {
   @test('valid.response : `response.header` required, invalid')
   public async test5() {
 
-    const url = '/valid/response/header';
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    const toPath = '/valid/response/header';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('expect(404)')
-        .put(url)
+        .put(toPath)
         .expect(404)
         .endAllureStep();
     }
@@ -245,7 +245,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('valid `response.header`')
-        .put(url)
+        .put(toPath)
         .expect(200)
         .expectHeader(TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS, '422')
         .endAllureStep();

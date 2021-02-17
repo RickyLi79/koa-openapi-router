@@ -83,16 +83,16 @@ export class TestSuite {
   @test('valid.request : required `body`')
   public async test1() {
 
-    const url = '/valid/request/body';
+    const toPath = '/valid/request/body';
     const body = { time: new Date(), value: 1 };
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .post(url)
+        .post(toPath)
         .send(body)
         .expect(404)
         .endAllureStep();
@@ -107,7 +107,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('no `body`')
-        .post(url)
+        .post(toPath)
         .expect(415)
         .endAllureStep();
     }
@@ -116,7 +116,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('no `body`')
-        .post(url)
+        .post(toPath)
         .set('content-type', 'application/json')
         .expect(422)
         .endAllureStep();
@@ -126,7 +126,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('valid `body`')
-        .post(url)
+        .post(toPath)
         .send(body)
         .expect(200)
         .endAllureStep();
@@ -136,7 +136,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('invalid `body`')
-        .post(url)
+        .post(toPath)
         .send({ value: '1' })
         .expect(422)
         .endAllureStep();
@@ -147,16 +147,16 @@ export class TestSuite {
   @test('valid.request : optional `body`')
   public async test2() {
 
-    const url = '/valid/request/body';
+    const toPath = '/valid/request/body';
     const body = { time: new Date(), value: 1 };
-    runStep(`set URL = '${url}'`, () => {
-      return url;
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
     });
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .post(url)
+        .post(toPath)
         .send(body)
         .expect(404)
         .endAllureStep();
@@ -171,7 +171,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('no `body`')
-        .patch(url)
+        .patch(toPath)
         .expect(200)
         .endAllureStep();
     }
@@ -180,7 +180,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('no `body`')
-        .patch(url)
+        .patch(toPath)
         .set('content-type', 'application/json')
         .expect(200)
         .endAllureStep();
@@ -190,7 +190,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('valid `body`')
-        .patch(url)
+        .patch(toPath)
         .send(body)
         .expect(200)
         .endAllureStep();
@@ -200,7 +200,7 @@ export class TestSuite {
       const agent = this.createAllureAgentProxy();
       await agent
         .stepName('invalid `body`')
-        .patch(url)
+        .patch(toPath)
         .send({ value: 1 })
         .expect(422)
         .endAllureStep();
