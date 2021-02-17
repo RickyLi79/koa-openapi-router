@@ -14,9 +14,9 @@ npm i -S @rickyli79/koa-openapi-router
 [Example](./example)
 
 #### Usage Documents
-- [Config.md](./docs/Config.md)
-- [Controllers.md](./docs/Controllers.md)
-- [Validate.md](./docs/Validate.md)
+- [Config.md](./docs/en/Config.md)
+- [Controllers.md](./docs/en/Controllers.md)
+- [Validate.md](./docs/en/Validate.md)
 
 #### Test Report
 - [Allure Report](https://rickyli79.github.io/testing-reports/koa-openapi-router/allure-report/)

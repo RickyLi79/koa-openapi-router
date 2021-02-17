@@ -2,25 +2,30 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as jsonschema from 'jsonschema';
 import { Next } from 'koa';
-import Router from 'koa-router';
+import { IRouterContext } from 'koa-router';
 import { OpenapiRouter, X_OAS_VER } from './OpenapiRouter';
 import { TEST_RESPONSE_HEADER_CONTROLLER_FILE, TEST_RESPONSE_HEADER_REQUEST_SCHEMA, TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS } from './Test-Response-Header';
-import { OPERATION_SCHEMA } from './types';
+import { OperationSchema, OPERATION_SCHEMA, Schema } from './types';
 
 
-const HEADER_MARKER = 'x-openapi-mark-';
+const OPEANAPI_PREFIX = 'x-openapi-';
+
+const HEADER_MARKER = `${OPEANAPI_PREFIX}mark`;
 const HEADER_MARKER_ACCEPT_CONTENT_TYPES = `${HEADER_MARKER}accept-content-types`;
 const HEADER_MARKER_REQUEST_BODY_REQUIRED = `${HEADER_MARKER}quest-body-required`;
 const HEADER_MARKER_RESPONSE_CONTENT_TYPES = `${HEADER_MARKER}response-content-types`;
 
+const OPENAPI_RQEUST_BODY_SCHEMA = `${OPEANAPI_PREFIX}request-bodySchema`;
+
+
 const CTX_OPERATION_SCHEMA = Symbol(`OpenapiRouterAction#${OPERATION_SCHEMA}`);
 
 export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
-  return async (ctx: Router.RouterContext, next: Next) => {
+  return async (ctx: IRouterContext, next: Next) => {
     const prefix = (<any>ctx.router).opts.prefix ?? '';
     const opt = `${ctx.method.toUpperCase()} ${(<any>ctx).routerPath.substr(prefix.length)}`;
 
-    const operation: any = openapiRouter.getOperationByOpt(opt);
+    const operation: OperationSchema = openapiRouter.getOperationByOpt(opt);
 
     if (operation === undefined) {
       ctx.status = 404;
@@ -81,6 +86,13 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
 
           if (para !== undefined) {
             try {
+              if (iOpt.schema.type !== 'string') {
+                if (iOpt.schema.type === 'integer') {
+                  para = Number.parseInt(para);
+                } else if (iOpt.schema.type === 'float') {
+                  para = Number.parseFloat(para);
+                }
+              }
               jsonschema.validate(para, iOpt.schema, { throwFirst: true, throwError: true });
             } catch (err) {
               ctx.status = 422;
@@ -140,11 +152,8 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
             return;
           }
         }
-        // if (!contentType && ctxContentType) {
-        //   ctx.status = 415;
-        //   return;
-        // }
         const reqBodySchema = doc_ver === 2 ? bodySchema : operation.requestBody?.content[contentType!]?.schema;
+        ctx[OPENAPI_RQEUST_BODY_SCHEMA] = reqBodySchema;
         if (Object.keys(ctx.request.body).length === 0) {
           if (requestBodyRequired !== true) {
             // pass
@@ -154,6 +163,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
             return;
           }
         } else if (reqBodySchema) {
+
           try {
             jsonschema.validate(ctx.request.body, reqBodySchema, { throwError: true, throwFirst: true });
           } catch (err) {
@@ -169,6 +179,8 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
     }
 
     ctx[CTX_OPERATION_SCHEMA] = operation;
+    ctx.getOperation = getOperation.bind(ctx);
+    ctx.getRequestBodySchema = getRequestBodySchema.bind(ctx);
     await action.action!(ctx, next);
 
     if (config.validSchema.reponse) {
@@ -177,7 +189,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
         const reponseSchema = operation.responses[ctx.status];
         const resHeaders = reponseSchema?.headers;
         for (const iHeaderName in resHeaders) {
-          const iHaderValue = ctx.response.get(iHeaderName);
+          let iHaderValue:any = ctx.response.get(iHeaderName);
           if (resHeaders[iHeaderName].required === true && !iHaderValue) {
             OpenapiRouter.logger.error(new SyntaxError(`'${iHeaderName}' in 'response.header' required`));
             if (config.test.enabled) {
@@ -186,8 +198,16 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
             toBreak = true;
             break;
           } else if (resHeaders[iHeaderName].schema) {
+            const schema = resHeaders[iHeaderName].schema;
             try {
-              jsonschema.validate(iHaderValue, resHeaders[iHeaderName].schema, { throwFirst: true, throwError: true });
+              if (schema.type !== 'string') {
+                if (schema.type === 'integer') {
+                  iHaderValue = Number.parseInt(iHaderValue);
+                } else if (schema.type === 'float') {
+                  iHaderValue = Number.parseFloat(iHaderValue);
+                }
+              }
+              jsonschema.validate(iHaderValue, schema, { throwFirst: true, throwError: true });
             } catch (err) {
               OpenapiRouter.logger.error(err.errors[0]);
               if (config.test.enabled) {
@@ -237,7 +257,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
               ctx.response.set(TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '415');
               break;
             }
-            const resContentSchema = doc_ver === 2 ? reponseSchema?.schema : reponseSchema?.content[contentType!]?.schema;
+            const resContentSchema = doc_ver === 2 ? (<any>reponseSchema)?.schema : reponseSchema?.content![contentType!]?.schema;
             if (resContentSchema !== undefined) {
               try {
                 jsonschema.validate(ctx.body, resContentSchema, { throwError: true, throwFirst: true });
@@ -271,6 +291,14 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
       }
     }
   };
+}
+
+function getOperation(this: IRouterContext): OperationSchema {
+  return this[CTX_OPERATION_SCHEMA];
+}
+
+function getRequestBodySchema(this: IRouterContext): Schema {
+  return this[OPENAPI_RQEUST_BODY_SCHEMA];
 }
 
 /*

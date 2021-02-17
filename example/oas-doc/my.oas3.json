@@ -1,0 +1,83 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "my api",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/hello": {
+      "get": {
+        "parameters": [{
+          "name": "",
+          "in": "cookie",
+          "schema":{},
+          "required": false
+        }],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      },
+      "post": {
+        "description": "controller should be 'controller/default.ts'",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/hello"
+        },
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/nihao": {
+      "get": {
+        "description": "controller should be 'controller/default.ts'",
+        "responses": {
+          "501": {
+            "description": "Not Implemented"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "my/tags/greetings"
+        ],
+        "description": "controller should be 'controller/myTag.ts'",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/hello"
+        },
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "requestBodies": {
+      "hello": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 20
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

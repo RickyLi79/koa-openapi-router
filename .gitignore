@@ -6,4 +6,3 @@ allure.test/**/*.map
 lib/**/*.map
 allure-results/
 allure-report/
-example/

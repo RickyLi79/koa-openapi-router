@@ -9,7 +9,7 @@ import * as watch from 'watch';
 import { FileOrFiles } from 'watch';
 import OpenapiRouterAction from './OpenapiRouterAction';
 import { defaultOpenapiRouterConfig } from './OpenapiRouterConfig';
-import { ILogger, IOpenapiRouterConfig as OpenapiRouterConfig, IOpenapiRouterFactoryConfig as OpenapiRouterFactoryConfig, IOptionalOpenapiRouterConfig as OptionalOpenapiRouterConfig, KoaControllerAction } from './types';
+import { ILogger, IOpenapiRouterConfig as OpenapiRouterConfig, IOpenapiRouterFactoryConfig as OpenapiRouterFactoryConfig, IOptionalOpenapiRouterConfig as OptionalOpenapiRouterConfig, KoaControllerAction, OperationSchema } from './types';
 
 const OPENAPI_ROUTER_LOGGER = Symbol('OpenapiRouter#openapiRouterLogger');
 const OPENAPI_ROUTER_MIDDLEWARE = Symbol('OpenapiRouter#openapiRouterMiddlerware');
@@ -31,7 +31,7 @@ export class OpenapiRouter {
 
   private optInDoc: { [doc: string]: string[] };// 单个api文档中包含的所有operation
 
-  private operationMap: { [opt: string]: any };// 整个router中已注册的url所对应的schema
+  private operationMap: { [opt: string]: OperationSchema };// 整个router中已注册的url所对应的schema
   public getOperationByOpt(opt: string) {
     return this.operationMap[opt];
   }
@@ -419,9 +419,9 @@ export class OpenapiRouter {
         this.addRouter(opt, iMethod, iPath2);
         // const fullOpt = `${iMethod.toUpperCase()} ${this.routerPrefix}${iPath2}`;
         if (actionInfo.action !== undefined) {
-          this.logger.debug(`openapi-router connected : method='${iMethod.toUpperCase()}' path='${this.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
+          this.logger.debug(`openapi-router connected success : method='${iMethod.toUpperCase()}' path='${this.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
         } else {
-          this.logger.error(`Can not connnect router : method='${iMethod.toUpperCase()}' path='${this.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
+          this.logger.error(`openapi-router connect failed : method='${iMethod.toUpperCase()}' path='${this.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
         }
       }
     }

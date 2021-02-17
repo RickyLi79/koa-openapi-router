@@ -2,6 +2,7 @@ import extend from 'extend';
 import { IOpenapiRouterConfig, IOptionalOpenapiRouterConfig } from './types';
 
 export const defaultOpenapiRouterConfig:IOpenapiRouterConfig = {
+
   controllerDir: '',
   docsDir: '',
 

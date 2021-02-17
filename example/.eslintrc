@@ -1,0 +1,11 @@
+{
+  "extends": "eslint-config-egg/typescript",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "rules": {
+    "no-lone-blocks":"off",
+    "no-multiple-empty-lines":"error",
+    "no-inferrable-types":"off"
+  }
+}
