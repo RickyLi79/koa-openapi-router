@@ -1,7 +1,6 @@
 import { suite, test } from '@testdeck/mocha';
 import { Severity } from 'allure-js-commons';
 import { allure } from 'allure-mocha/runtime';
-import extend from 'extend';
 import http from 'http';
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
@@ -11,11 +10,12 @@ import supertest, { SuperAgentTest } from 'supertest';
 import { AllureHelper, AllureStepProxy } from 'supertest-allure-step-helper';
 import * as allureDecorators from 'ts-test-decorators';
 import { OpenapiRouter } from '../../lib/OpenapiRouter';
-import { IOptionalOpenapiRouterConfig } from '../../lib/types';
+import { createOpenapiRouterConfig } from '../../lib/OpenapiRouterConfig';
+import { IOpenapiRouterConfig } from '../../lib/types';
 import { MutedLogger, TestStore } from '../TestStore';
 import { docsFile_create_oas3_json } from './docs/docsPath';
 
-let defaultOpenapiRouterConfig: IOptionalOpenapiRouterConfig;
+let defaultOpenapiRouterConfig: IOpenapiRouterConfig;
 
 @suite('OpenapiRouter: proxyAction')
 export class TestSuite {
@@ -29,7 +29,7 @@ export class TestSuite {
 
     AllureHelper.runStep('mute OpenapiRouter.logger', () => { OpenapiRouter.logger = new MutedLogger(); });
     AllureHelper.runStep('const defaultConfig', () => {
-      defaultOpenapiRouterConfig = {
+      defaultOpenapiRouterConfig = createOpenapiRouterConfig({
         controllerDir: path.join(__dirname, 'controller'),
         docsDir: docsFile_create_oas3_json,
         recursive: false,
@@ -44,8 +44,7 @@ export class TestSuite {
           enabled: true,
           controllerFileExt: '.ts',
         },
-
-      };
+      });
       AllureHelper.attachmentJson('defaultConfig', defaultOpenapiRouterConfig);
     });
 
@@ -95,8 +94,7 @@ export class TestSuite {
         .endAllureStep();
     }
     await AllureHelper.runStep('OpenapiRouter.Start(), with `proxyAction`', async () => {
-      const config = extend(true,
-        {},
+      const config = createOpenapiRouterConfig(
         defaultOpenapiRouterConfig,
         {
           proxyAction: async (ctx: IRouterContext) => {

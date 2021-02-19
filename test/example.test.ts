@@ -1,7 +1,7 @@
+import http from 'http';
 import Koa from 'koa';
 import bodyparser from 'koa-bodyparser';
 import path from 'path';
-import http from 'http';
 import supertest from 'supertest';
 import { createOpenapiRouterConfig, OpenapiRouter } from '..';
 
@@ -39,5 +39,6 @@ describe('index.test', () => {
       .get('/my/api/pets')
       .expect(200);
   });
+
 });
 

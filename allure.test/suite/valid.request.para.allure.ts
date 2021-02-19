@@ -10,11 +10,12 @@ import { AllureStepProxy } from 'supertest-allure-step-helper';
 import { attachmentJson, attachmentUtf8FileAuto, runStep } from 'supertest-allure-step-helper/helpers/AllureHelper';
 import * as allureDecorators from 'ts-test-decorators';
 import { OpenapiRouter } from '../../lib/OpenapiRouter';
-import { IOptionalOpenapiRouterConfig } from '../../lib/types';
+import { createOpenapiRouterConfig } from '../../lib/OpenapiRouterConfig';
+import { IOpenapiRouterConfig } from '../../lib/types';
 import { MutedLogger, TestStore } from '../TestStore';
 import { docsFile_valid_req_body_oas3_yaml } from './docs/docsPath';
 
-let defaultOpenapiRouterConfig: IOptionalOpenapiRouterConfig;
+let defaultOpenapiRouterConfig: IOpenapiRouterConfig;
 
 @suite('OpenapiRouter: valid.request.para')
 export class TestSuite {
@@ -30,7 +31,7 @@ export class TestSuite {
 
     runStep('mute OpenapiRouter.logger', () => { OpenapiRouter.logger = new MutedLogger(); });
     runStep('const defaultConfig', () => {
-      defaultOpenapiRouterConfig = {
+      defaultOpenapiRouterConfig = createOpenapiRouterConfig({
         controllerDir: path.join(__dirname, 'controller'),
         docsDir: docsFile_valid_req_body_oas3_yaml,
         recursive: false,
@@ -45,7 +46,7 @@ export class TestSuite {
           enabled: true,
           controllerFileExt: '.ts',
         },
-      };
+      });
       attachmentJson('defaultConfig', defaultOpenapiRouterConfig);
     });
   }

@@ -80,9 +80,11 @@ export class OpenapiRouter {
     return this._router;
   }
 
-  private static isEggApp = false;
+  public static isEggApp = false;
+  private static app: any;
   public static async Start(app: any, configs: IOptionalOpenapiRouterConfig | (IOptionalOpenapiRouterConfig[]), options?: IOpenapiRouterOptions) {
     if (options?.logger) this.logger = options?.logger;
+    this.app = app;
     this.isEggApp = !!options?.isEggApp;
     if (!Array.isArray(configs)) { configs = [ configs ]; }
     const promiseArr: Promise<boolean>[] = [];
@@ -203,48 +205,55 @@ export class OpenapiRouter {
       return actionInfo;
     }
     const operation: any = this.getOperationByOpt(opt);
-    {
-      const tag = operation[X_CONTROLLER] ?? operation.tags?.[0] ?? 'default';
-      actionInfo = { file: tag + '.js', func: '' };
+    const tag: string = operation[X_CONTROLLER] ?? operation.tags?.[0] ?? 'default';
+    actionInfo = { file: tag + '.js', func: qry.method.toUpperCase() + ' ' + qry.path };
 
-      if (OpenapiRouter.isEggApp) {
-        //
-      } else {
 
-        let ctl: any;
-        try {
-          const ctlCls = require(path.join(this.config.controllerDir, tag));
-          if (ctlCls.__esModule) {
-            if (typeof ctlCls.default === 'function') {
-              ctl = new ctlCls.default();
-            } else if (typeof ctlCls.default === 'object') {
-              ctl = ctlCls.default;
-            }
-          } else {
-            ctl = ctlCls;
-          }
-          let func = qry.method.toUpperCase() + ' ' + qry.path;
-          actionInfo.action = ctl[func];
-          if (!actionInfo.action) {
-            func = 'ALL ' + qry.path;
-            actionInfo.action = ctl[func];
-          }
-          if (!actionInfo.action) {
-            func = qry.path;
-            actionInfo.action = ctl[func];
-          }
+    let ctl: any;
+    if (OpenapiRouter.isEggApp) {
+      const controllerPath = tag.split('/');
+      ctl = OpenapiRouter.app.controller;
+      for (const iPath of controllerPath) {
+        ctl = ctl?.[iPath];
+      }
+    } else {
 
-          if (!actionInfo.action) {
-            func = qry.method.toUpperCase() + ' ' + qry.path;
+      try {
+        const ctlCls = require(path.join(this.config.controllerDir, tag));
+        if (ctlCls.__esModule) {
+          if (typeof ctlCls.default === 'function') {
+            ctl = new ctlCls.default();
+          } else if (typeof ctlCls.default === 'object') {
+            ctl = ctlCls.default;
           }
-
-          actionInfo.func = func;
-          if (typeof actionInfo.action === 'function') {
-            this.koaControllerActionMap[opt] = actionInfo;
-          }
-        } catch (e) {
-          // this.logger.error(e);
+        } else {
+          ctl = ctlCls;
         }
+
+      } catch (e) {
+        // this.logger.error(e);
+      }
+    }
+
+    if (ctl) {
+      let func = qry.method.toUpperCase() + ' ' + qry.path;
+      actionInfo.action = ctl[func];
+      if (!actionInfo.action) {
+        func = 'ALL ' + qry.path;
+        actionInfo.action = ctl[func];
+      }
+      if (!actionInfo.action) {
+        func = qry.path;
+        actionInfo.action = ctl[func];
+      }
+
+      if (!actionInfo.action) {
+        func = qry.method.toUpperCase() + ' ' + qry.path;
+      }
+
+      actionInfo.func = func;
+      if (typeof actionInfo.action === 'function') {
+        this.koaControllerActionMap[opt] = actionInfo;
       }
     }
     return actionInfo;
@@ -268,7 +277,7 @@ export class OpenapiRouter {
    *
    * load/reload OpenApi-doc
    */
-  public async loadOpenapi() {
+  public loadOpenapi() {
     return new Promise<boolean>((resolve, rejects) => {
       let docsDir = this.config.docsDir;
       if (!fs.existsSync(docsDir)) {

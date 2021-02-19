@@ -10,11 +10,12 @@ import { AllureStepProxy } from 'supertest-allure-step-helper';
 import { attachmentJson, attachmentUtf8FileAuto, runStep } from 'supertest-allure-step-helper/helpers/AllureHelper';
 import * as allureDecorators from 'ts-test-decorators';
 import { OpenapiRouter } from '../../lib/OpenapiRouter';
-import { IOptionalOpenapiRouterConfig } from '../../lib/types';
+import { createOpenapiRouterConfig } from '../../lib/OpenapiRouterConfig';
+import { IOpenapiRouterConfig } from '../../lib/types';
 import { MutedLogger, TestStore } from '../TestStore';
 import { docsFile_valid_req_body_oas2_json } from './docs/docsPath';
 
-let defaultOpenapiRouterConfig: IOptionalOpenapiRouterConfig;
+let defaultOpenapiRouterConfig: IOpenapiRouterConfig;
 
 @suite('OpenapiRouter: valid.request.body - oas2')
 export class TestSuite {
@@ -29,7 +30,7 @@ export class TestSuite {
 
     runStep('mute OpenapiRouter.logger', () => { OpenapiRouter.logger = new MutedLogger(); });
     runStep('const defaultConfig', () => {
-      defaultOpenapiRouterConfig = {
+      defaultOpenapiRouterConfig = createOpenapiRouterConfig({
         controllerDir: path.join(__dirname, 'controller'),
         docsDir: docsFile_valid_req_body_oas2_json,
         recursive: false,
@@ -44,7 +45,7 @@ export class TestSuite {
           enabled: true,
           controllerFileExt: '.ts',
         },
-      };
+      });
       attachmentJson('defaultConfig', defaultOpenapiRouterConfig);
     });
 
@@ -73,7 +74,7 @@ export class TestSuite {
     TestSuite.server.removeAllListeners();
   }
 
-  protected createAllureAgentProxy(url?:string) {
+  protected createAllureAgentProxy(url?: string) {
     const agent = supertest.agent(url ?? TestSuite.server);
     TestSuite.allureAgentProxy = AllureStepProxy.create(agent);
     return TestSuite.allureAgentProxy!;

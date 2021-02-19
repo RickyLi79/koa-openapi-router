@@ -28,6 +28,7 @@ const CTX_OPERATION_SCHEMA = Symbol(`OpenapiRouterAction#${OPERATION_SCHEMA}`);
 
 export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
   return async (ctx: IRouterContext, next: Next) => {
+
     const prefix = (<any>ctx.router).opts.prefix ?? '';
     const opt = `${ctx.method.toUpperCase()} ${(<any>ctx).routerPath.substr(prefix.length)}`;
 
