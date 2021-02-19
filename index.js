@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createOpenapiRouterConfig = exports.defaultOpenapiRouterConfig = exports.OpenapiRouter = void 0;
+exports.createOpenapiRouterConfigByDefault = exports.createOpenapiRouterConfig = exports.defaultOpenapiRouterConfig = exports.OpenapiRouter = void 0;
 const tslib_1 = require("tslib");
 var OpenapiRouter_1 = require("./lib/OpenapiRouter");
 Object.defineProperty(exports, "OpenapiRouter", { enumerable: true, get: function () { return OpenapiRouter_1.OpenapiRouter; } });
@@ -8,3 +8,4 @@ tslib_1.__exportStar(require("./lib/types"), exports);
 var OpenapiRouterConfig_1 = require("./lib/OpenapiRouterConfig");
 Object.defineProperty(exports, "defaultOpenapiRouterConfig", { enumerable: true, get: function () { return OpenapiRouterConfig_1.defaultOpenapiRouterConfig; } });
 Object.defineProperty(exports, "createOpenapiRouterConfig", { enumerable: true, get: function () { return OpenapiRouterConfig_1.createOpenapiRouterConfig; } });
+Object.defineProperty(exports, "createOpenapiRouterConfigByDefault", { enumerable: true, get: function () { return OpenapiRouterConfig_1.createOpenapiRouterConfigByDefault; } });
