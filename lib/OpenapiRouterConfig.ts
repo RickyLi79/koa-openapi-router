@@ -35,3 +35,12 @@ export const defaultOpenapiRouterConfig: IOpenapiRouterConfig = {
 export function createOpenapiRouterConfig(config: IOptionalOpenapiRouterConfig, ...configs: IOptionalOpenapiRouterConfig[]): IOpenapiRouterConfig {
   return extend(true, {}, defaultOpenapiRouterConfig, config, ...configs);
 }
+
+export function createOpenapiRouterConfigByDefault(configs: IOptionalOpenapiRouterConfig[]): IOpenapiRouterConfig[] {
+  const result:IOpenapiRouterConfig[] = [];
+  for (const iConfig of configs) {
+    result.push(extend(true, {}, defaultOpenapiRouterConfig, iConfig));
+  }
+  return result;
+}
+
