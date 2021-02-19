@@ -15,6 +15,12 @@
 #### 定义
 ```ts
 export type IOpenapiRouterConfig = {
+
+  /**
+   * Prefix for all routes.
+   */
+  prefix?: string;
+
   /**
    * controller folder name
    * @example
@@ -82,8 +88,9 @@ export type IOpenapiRouterConfig = {
 
 #### 通过`getConfig()`初始化
 ```ts
-import { getConfig } from 'koa-openapi-router';
+import { getConfig } from '@rickyli79/koa-openapi-router';
 const config = getConfig({
+  routerPrefix: '/my/api',
   controllerDir: path.join(process.cwd(), 'controller'),
   docsDir: path.join(process.cwd(), 'oas-doc'),
 });
@@ -91,12 +98,13 @@ const config = getConfig({
 
 #### 通过`new ()`初始化
 ```ts
-import { OpenapiRouter } from 'koa-openapi-router';
+import { OpenapiRouter } from '@rickyli79/koa-openapi-router';
 const router = new Router();
-const openapiRouter = new OpenapiRouter(router,
+const openapiRouter = new OpenapiRouter(
   {
+    routerPrefix: '/my/api',
     controllerDir: path.join(process.cwd(), 'controller'),
-      docsDir: path.join(process.cwd(), 'oas-doc'),
+    docsDir: path.join(process.cwd(), 'oas-doc'),
   });
 openapiRouter.loadOpenapi();
 app.use(router.routes());  // same as : app.use(openapiRouter.getRouter().routes());
@@ -108,13 +116,13 @@ app.use(router.allowedMethods());
 ```
 #### 通过工厂方法`OpenapiRouter.Start()`初始化
 ```ts
-import { OpenapiRouter } from 'koa-openapi-router';
+import { OpenapiRouter } from '@rickyli79/koa-openapi-router';
 // ... app init
-OpenapiRouter.Start(app, {
-  router: { prefix: '/my/api' },
-  config: {
+OpenapiRouter.Start(app, 
+  {
+    routerPrefix: '/my/api',
     controllerDir: path.join(process.cwd(), 'controller'),
-     docsDir: path.join(process.cwd(), 'oas-doc'),
-   },
-});
+    docsDir: path.join(process.cwd(), 'oas-doc'),
+  }
+);
 ```

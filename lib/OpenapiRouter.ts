@@ -2,16 +2,15 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
 import extend from 'extend';
 import * as fs from 'fs';
-import Koa from 'koa';
-import Router, { IRouterOptions } from 'koa-router';
+import Router from 'koa-router';
 import * as path from 'path';
 import * as watch from 'watch';
 import { FileOrFiles } from 'watch';
 import OpenapiRouterAction from './OpenapiRouterAction';
 import { defaultOpenapiRouterConfig } from './OpenapiRouterConfig';
-import { ILogger, IOpenapiRouterConfig as OpenapiRouterConfig, IOpenapiRouterFactoryConfig as OpenapiRouterFactoryConfig, IOptionalOpenapiRouterConfig as OptionalOpenapiRouterConfig, KoaControllerAction, OperationSchema } from './types';
+import { ILogger, IOpenapiRouterConfig, IOpenapiRouterOptions, IOptionalOpenapiRouterConfig, KoaControllerAction, OperationSchema } from './types';
 
-const OPENAPI_ROUTER_LOGGER = Symbol('OpenapiRouter#openapiRouterLogger');
+export const OPENAPI_ROUTER_LOGGER = Symbol('OpenapiRouter#openapiRouterLogger');
 const OPENAPI_ROUTER_MIDDLEWARE = Symbol('OpenapiRouter#openapiRouterMiddlerware');
 export const X_OAS_VER = 'x-oas-ver';
 const X_CONTROLLER = 'x-controller';
@@ -51,13 +50,13 @@ export class OpenapiRouter {
     this[OPENAPI_ROUTER_LOGGER] = value;
   }
 
-  public readonly config: OpenapiRouterConfig;
+  public readonly config: IOpenapiRouterConfig;
 
-  public constructor(router: Router | IRouterOptions, config: OptionalOpenapiRouterConfig) {
+  public constructor(config: IOptionalOpenapiRouterConfig) {
 
-    this._router = (router instanceof Router) ? router : new Router(router);
     this.config = extend(true, {}, defaultOpenapiRouterConfig, config);
 
+    this._router = new Router({ prefix: config.routerPrefix });
     this.proxyAction = config.proxyAction;
     OpenapiRouter._openapiRouters.push(this);
   }
@@ -73,11 +72,7 @@ export class OpenapiRouter {
   }
 
   public toString() {
-    return `[OpenapiRouter (prefix=${this.routerPrefix})]`;
-  }
-
-  public get routerPrefix() {
-    return (<any> this._router).opts?.prefix ?? '';
+    return `[OpenapiRouter (prefix=${this.config.routerPrefix})]`;
   }
 
   private readonly _router: Router;
@@ -85,15 +80,19 @@ export class OpenapiRouter {
     return this._router;
   }
 
-  public static async Start(app: Koa, configs: OpenapiRouterFactoryConfig | (OpenapiRouterFactoryConfig[]), logger?: ILogger) {
-    if (logger) this.logger = logger;
+  private static isEggApp = false;
+  public static async Start(app: any, configs: IOptionalOpenapiRouterConfig | (IOptionalOpenapiRouterConfig[]), options?: IOpenapiRouterOptions) {
+    if (options?.logger) this.logger = options?.logger;
+    this.isEggApp = !!options?.isEggApp;
     if (!Array.isArray(configs)) { configs = [ configs ]; }
     const promiseArr: Promise<boolean>[] = [];
     for (const iConfig of configs) {
-      const router: Router = (iConfig.router instanceof Router) ? iConfig.router : new Router(iConfig.router);
-      const openapiRouter = new OpenapiRouter(router, iConfig.config);
+      const openapiRouter = new OpenapiRouter(iConfig);
       promiseArr.push(openapiRouter.loadOpenapi());
-      app.use(router.routes());
+      app.use(openapiRouter._router.routes());
+      if (options?.useAllowedMethods) {
+        app.use(openapiRouter._router.allowedMethods());
+      }
     }
     await Promise.all(promiseArr);
   }
@@ -203,46 +202,51 @@ export class OpenapiRouter {
     if (actionInfo !== undefined || qry === undefined) {
       return actionInfo;
     }
-
     const operation: any = this.getOperationByOpt(opt);
     {
       const tag = operation[X_CONTROLLER] ?? operation.tags?.[0] ?? 'default';
       actionInfo = { file: tag + '.js', func: '' };
-      let ctl: any;
-      try {
-        const ctlCls = require(path.join(this.config.controllerDir, tag));
-        if (ctlCls.__esModule) {
-          if (typeof ctlCls.default === 'function') {
-            ctl = new ctlCls.default();
-          } else if (typeof ctlCls.default === 'object') {
-            ctl = ctlCls.default;
+
+      if (OpenapiRouter.isEggApp) {
+        //
+      } else {
+
+        let ctl: any;
+        try {
+          const ctlCls = require(path.join(this.config.controllerDir, tag));
+          if (ctlCls.__esModule) {
+            if (typeof ctlCls.default === 'function') {
+              ctl = new ctlCls.default();
+            } else if (typeof ctlCls.default === 'object') {
+              ctl = ctlCls.default;
+            }
+          } else {
+            ctl = ctlCls;
           }
-        } else {
-          ctl = ctlCls;
-        }
-        let func = qry.method.toUpperCase() + ' ' + qry.path;
-        actionInfo.action = ctl[func];
-        if (!actionInfo.action) {
-          func = 'ALL ' + qry.path;
+          let func = qry.method.toUpperCase() + ' ' + qry.path;
           actionInfo.action = ctl[func];
-        }
-        if (!actionInfo.action) {
-          func = qry.path;
-          actionInfo.action = ctl[func];
-        }
+          if (!actionInfo.action) {
+            func = 'ALL ' + qry.path;
+            actionInfo.action = ctl[func];
+          }
+          if (!actionInfo.action) {
+            func = qry.path;
+            actionInfo.action = ctl[func];
+          }
 
-        if (!actionInfo.action) {
-          func = qry.method.toUpperCase() + ' ' + qry.path;
-        }
+          if (!actionInfo.action) {
+            func = qry.method.toUpperCase() + ' ' + qry.path;
+          }
 
-        if (typeof func === 'function') {
           actionInfo.func = func;
+          if (typeof actionInfo.action === 'function') {
+            this.koaControllerActionMap[opt] = actionInfo;
+          }
+        } catch (e) {
+          // this.logger.error(e);
         }
-      } catch (e) {
-        // this.logger.error(e);
       }
     }
-    this.koaControllerActionMap[opt] = actionInfo;
     return actionInfo;
   }
 
@@ -268,7 +272,7 @@ export class OpenapiRouter {
     return new Promise<boolean>((resolve, rejects) => {
       let docsDir = this.config.docsDir;
       if (!fs.existsSync(docsDir)) {
-        const err = new Error(`no such directory, stat '${docsDir}',  prefix='${this.routerPrefix}'`);
+        const err = new Error(`no such directory, stat '${docsDir}',  prefix='${this.config.routerPrefix}'`);
         this.logger.error(err);
         rejects(err);
       }
@@ -450,12 +454,12 @@ export class OpenapiRouter {
         iOperation[X_OAS_VER] = specVersion;
         this.operationMap[opt] = iOperation;
         const actionInfo = this.getKoaControllerAction(opt, { method: iMethod, path: iPath2 });
-        this.addRouter(opt, iMethod, iPath2);
+        this.addRouter(iMethod, iPath2);
         // const fullOpt = `${iMethod.toUpperCase()} ${this.routerPrefix}${iPath2}`;
         if (actionInfo.action !== undefined) {
-          this.logger.debug(`openapi-router connected success : method='${iMethod.toUpperCase()}' path='${this.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
+          this.logger.debug(`openapi-router connected success : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
         } else {
-          this.logger.error(`openapi-router connect failed : method='${iMethod.toUpperCase()}' path='${this.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
+          this.logger.error(`openapi-router connect failed : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
         }
       }
     }
@@ -470,7 +474,7 @@ export class OpenapiRouter {
     return this[OPENAPI_ROUTER_MIDDLEWARE];
   }
 
-  private addRouter(opt: string, method: string, path: string) {
+  private addRouter(method: string, path: string) {
     this._router[method.toLowerCase()](
       path,
       this.action,

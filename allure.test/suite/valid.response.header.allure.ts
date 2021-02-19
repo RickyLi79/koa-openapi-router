@@ -20,7 +20,6 @@ let defaultOpenapiRouterConfig: IOptionalOpenapiRouterConfig;
 @suite('OpenapiRouter: valid.response.header')
 export class TestSuite {
 
-
   static server: http.Server;
   static app: Koa;
   static allureAgentProxy: SuperAgentTest | undefined;
@@ -100,7 +99,7 @@ export class TestSuite {
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
-      await OpenapiRouter.Start(TestSuite.app, { router: {}, config: defaultOpenapiRouterConfig });
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
 
@@ -135,7 +134,7 @@ export class TestSuite {
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
-      await OpenapiRouter.Start(TestSuite.app, { router: {}, config: defaultOpenapiRouterConfig });
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
 
@@ -169,7 +168,7 @@ export class TestSuite {
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
-      await OpenapiRouter.Start(TestSuite.app, { router: {}, config: defaultOpenapiRouterConfig });
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
 
@@ -203,7 +202,7 @@ export class TestSuite {
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
-      await OpenapiRouter.Start(TestSuite.app, { router: {}, config: defaultOpenapiRouterConfig });
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
 
@@ -237,7 +236,7 @@ export class TestSuite {
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
-      await OpenapiRouter.Start(TestSuite.app, { router: {}, config: defaultOpenapiRouterConfig });
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
 

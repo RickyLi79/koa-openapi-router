@@ -2,7 +2,6 @@ import { allure } from 'allure-mocha/runtime';
 import http from 'http';
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
-import Router from 'koa-router';
 import path from 'path';
 import supertest from 'supertest';
 import { config, runStep, writePackageVerToEnvironmentInfo } from 'supertest-allure-step-helper/helpers/AllureHelper';
@@ -10,7 +9,6 @@ import * as allureDecorators from 'ts-test-decorators';
 import { OpenapiRouter } from '../lib/OpenapiRouter';
 import { ILogger, IOptionalOpenapiRouterConfig } from '../lib/types';
 import { docsFile_create_oas3_json } from './suite/docs/docsPath';
-
 
 const SUITE_COUNTER = Symbol('TestStoreStatic#suiteCounter');
 const ALLURE_INITED = Symbol('TestStoreStatic#allureInited');
@@ -79,11 +77,9 @@ class TestStoreStatic {
       const app: Koa = suite.app = new Koa();
       const server: http.Server = suite.sever = app.listen();
       app.use(bodyParser());
-
-      const router = new Router();
-      const openapiRouter = new OpenapiRouter(router, testConfig);
+      const openapiRouter = new OpenapiRouter(testConfig);
       await openapiRouter.loadOpenapi();
-      app.use(router.routes());
+      app.use(openapiRouter.getRouter().routes());
 
       await supertest.agent(server)
         .get('/no/such/path')

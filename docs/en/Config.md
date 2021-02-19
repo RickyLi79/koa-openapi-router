@@ -15,6 +15,12 @@ English | [[简体中文]](../../README.zh-CN.md)
 #### Definition
 ```ts
 export type IOpenapiRouterConfig = {
+
+  /**
+   * Prefix for all routes.
+   */
+  prefix?: string;
+
   /**
    * controller folder name
    * @example
@@ -82,8 +88,9 @@ export type IOpenapiRouterConfig = {
 
 #### Init by `getConfig()`
 ```ts
-import { getConfig } from 'koa-openapi-router';
-const config = getConfig({
+import { createOpenapiRouterConfig } from '@rickyli79/koa-openapi-router';
+const config = createOpenapiRouterConfig({
+  routerPrefix: '/my/api',
   controllerDir: path.join(process.cwd(), 'controller'),
   docsDir: path.join(process.cwd(), 'oas-doc'),
 });
@@ -91,30 +98,26 @@ const config = getConfig({
 
 #### Init by `new ()`
 ```ts
-import { OpenapiRouter } from 'koa-openapi-router';
+import { OpenapiRouter } from '@rickyli79/koa-openapi-router';
 const router = new Router();
-const openapiRouter = new OpenapiRouter(router,
+const openapiRouter = new OpenapiRouter(
   {
+    routerPrefix: '/my/api',
     controllerDir: path.join(process.cwd(), 'controller'),
-      docsDir: path.join(process.cwd(), 'oas-doc'),
+    docsDir: path.join(process.cwd(), 'oas-doc'),
   });
 openapiRouter.loadOpenapi();
 app.use(router.routes());  // same as : app.use(openapiRouter.getRouter().routes());
-
-/**
- * the follow code is NOT recommended when `config.watcher.enabled===true`
- */
-app.use(router.allowedMethods());
 ```
 #### Init by `OpenapiRouter.Start()`
 ```ts
-import { OpenapiRouter } from 'koa-openapi-router';
+import { OpenapiRouter } from '@rickyli79/koa-openapi-router';
 // ... app init
-OpenapiRouter.Start(app, {
-  router: { prefix: '/my/api' },
-  config: {
+OpenapiRouter.Start(app, 
+  {
+    routerPrefix: '/my/api',
     controllerDir: path.join(process.cwd(), 'controller'),
-     docsDir: path.join(process.cwd(), 'oas-doc'),
-   },
-});
+    docsDir: path.join(process.cwd(), 'oas-doc'),
+  }
+);
 ```

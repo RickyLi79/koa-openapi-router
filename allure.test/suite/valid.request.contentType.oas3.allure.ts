@@ -12,7 +12,6 @@ import * as allureDecorators from 'ts-test-decorators';
 import { OpenapiRouter } from '../../lib/OpenapiRouter';
 import { IOptionalOpenapiRouterConfig } from '../../lib/types';
 import { MutedLogger, TestStore } from '../TestStore';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { docsFile_valid_req_contentType_oas3_yml } from './docs/docsPath';
 
 
@@ -99,7 +98,7 @@ export class TestSuite {
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
-      await OpenapiRouter.Start(TestSuite.app, { router: {}, config: defaultOpenapiRouterConfig });
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
 
@@ -152,7 +151,7 @@ export class TestSuite {
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
-      await OpenapiRouter.Start(TestSuite.app, { router: {}, config: defaultOpenapiRouterConfig });
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
 
@@ -205,7 +204,7 @@ export class TestSuite {
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
-      await OpenapiRouter.Start(TestSuite.app, { router: {}, config: defaultOpenapiRouterConfig });
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
 

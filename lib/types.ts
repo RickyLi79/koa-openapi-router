@@ -1,5 +1,5 @@
 import { Next } from 'koa';
-import Router, { IRouterOptions, IRouterContext } from 'koa-router';
+import { IRouterContext } from 'koa-router';
 
 export interface ILogger {
   error(msg: any, ...args: any[]): void;
@@ -10,9 +10,23 @@ export interface ILogger {
 
 export type KoaControllerAction = (ctx: IRouterContext, next?: Next) => Promise<any>;
 
+export type IOpenapiRouterOptions = {
+  logger?: ILogger,
+  isEggApp?: boolean,
+  useAllowedMethods?:boolean,
+};
+
 export type IOptionalOpenapiRouterConfig = PowerPartial<IOpenapiRouterConfig> & { controllerDir: string, docsDir: string };
 
 export type IOpenapiRouterConfig = {
+
+
+  /**
+   * Prefix for koa-router.
+   */
+  routerPrefix: string;
+
+
   /**
    * controller folder name
    * @example
@@ -83,8 +97,6 @@ export type IOpenapiRouterConfig = {
     controllerFileExt: '.ts' | '.js'
   };
 };
-
-export type IOpenapiRouterFactoryConfig = { router: Router | IRouterOptions, config: IOptionalOpenapiRouterConfig };
 
 export const OPERATION_SCHEMA = 'operation-schema';
 

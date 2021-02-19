@@ -105,7 +105,7 @@ export class TestSuite {
             ctx.body = 'ok';
           },
         });
-      await OpenapiRouter.Start(TestSuite.app, { router: {}, config });
+      await OpenapiRouter.Start(TestSuite.app, config);
       AllureHelper.attachmentUtf8FileAuto(config.docsDir);
     });
 
@@ -138,7 +138,7 @@ export class TestSuite {
 
     let openapiRouter!: OpenapiRouter;
     await AllureHelper.runStep('OpenapiRouter.Start(), no `proxyAction`', async () => {
-      await OpenapiRouter.Start(TestSuite.app, { router: {}, config: defaultOpenapiRouterConfig });
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
       AllureHelper.attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
       openapiRouter = OpenapiRouter.getOpenapiRouters()[0];
     });
@@ -201,7 +201,7 @@ export class TestSuite {
 
     let openapiRouter!: OpenapiRouter;
     await AllureHelper.runStep('OpenapiRouter.Start(), no `proxyAction`', async () => {
-      await OpenapiRouter.Start(TestSuite.app, { router: {}, config: defaultOpenapiRouterConfig });
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
       AllureHelper.attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
       openapiRouter = OpenapiRouter.getOpenapiRouters()[0];
     });

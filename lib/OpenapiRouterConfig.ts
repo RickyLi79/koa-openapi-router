@@ -1,7 +1,12 @@
 import extend from 'extend';
 import { IOpenapiRouterConfig, IOptionalOpenapiRouterConfig } from './types';
 
-export const defaultOpenapiRouterConfig:IOpenapiRouterConfig = {
+/**
+ * recommanded config in production env
+ */
+export const defaultOpenapiRouterConfig: IOpenapiRouterConfig = {
+
+  routerPrefix: '',
 
   controllerDir: '',
   docsDir: '',
@@ -22,6 +27,11 @@ export const defaultOpenapiRouterConfig:IOpenapiRouterConfig = {
   },
 };
 
-export function getConfig(config:IOptionalOpenapiRouterConfig):IOpenapiRouterConfig {
-  return extend(true, {}, defaultOpenapiRouterConfig, config);
+
+/**
+ * create a OpenapiRouterConfig , extend the default value
+ * @see #defaultOpenapiRouterConfig
+ */
+export function createOpenapiRouterConfig(config: IOptionalOpenapiRouterConfig, ...configs: IOptionalOpenapiRouterConfig[]): IOpenapiRouterConfig {
+  return extend(true, {}, defaultOpenapiRouterConfig, config, ...configs);
 }

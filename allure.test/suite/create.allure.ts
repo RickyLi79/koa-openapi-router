@@ -5,7 +5,6 @@ import extend from 'extend';
 import http from 'http';
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
-import Router from 'koa-router';
 import path from 'path';
 import supertest, { SuperAgentTest } from 'supertest';
 import { AllureStepProxy } from 'supertest-allure-step-helper';
@@ -73,7 +72,7 @@ export class TestSuite {
     TestSuite.server.removeAllListeners();
   }
 
-  protected createAllureAgentProxy(url?:string) {
+  protected createAllureAgentProxy(url?: string) {
     const agent = supertest.agent(url ?? TestSuite.server);
     TestSuite.allureAgentProxy = AllureStepProxy.create(agent);
     return TestSuite.allureAgentProxy!;
@@ -97,10 +96,9 @@ export class TestSuite {
     }
 
     await runStep('new OpenapiRouter()', async () => {
-      const router = new Router();
-      const openapiRouter = new OpenapiRouter(router, defaultOpenapiRouterConfig);
+      const openapiRouter = new OpenapiRouter(defaultOpenapiRouterConfig);
       await openapiRouter.loadOpenapi();
-      TestSuite.app.use(router.routes());
+      TestSuite.app.use(openapiRouter.getRouter().routes());
       attachmentJson('openapiRouter config', openapiRouter.config);
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
@@ -132,11 +130,10 @@ export class TestSuite {
     }
 
     await runStep('new OpenapiRouter()', async () => {
-      const router = new Router();
       const config = extend(true, {}, defaultOpenapiRouterConfig, { docsDir });
-      const openapiRouter = new OpenapiRouter(router, config);
+      const openapiRouter = new OpenapiRouter(config);
       await openapiRouter.loadOpenapi();
-      TestSuite.app.use(router.routes());
+      TestSuite.app.use(openapiRouter.getRouter().routes());
 
       attachmentJson('openapiRouter config', openapiRouter.config);
     });
@@ -168,9 +165,9 @@ export class TestSuite {
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
-      const routerConfig = { prefix: '/api' };
-      await OpenapiRouter.Start(TestSuite.app, { router: routerConfig, config: defaultOpenapiRouterConfig });
-      attachmentJsonByObj({ routerConfig, defaultOpenapiRouterConfig });
+      const routerConfig = extend(true, {}, defaultOpenapiRouterConfig, { routerPrefix: '/api' });
+      await OpenapiRouter.Start(TestSuite.app, routerConfig);
+      attachmentJsonByObj({ routerConfig });
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
 
@@ -227,20 +224,11 @@ export class TestSuite {
     });
 
     await runStep('OpenapiRouter.Start(), mutil', async () => {
-      const config1 = extend(true, {}, defaultOpenapiRouterConfig, { docsDir: docsFile_create_oas3_json });
-      const config2 = extend(true, {}, defaultOpenapiRouterConfig, { docsDir: docsFile_valid_req_para_oas3_json });
-      const config3 = extend(true, {}, defaultOpenapiRouterConfig, { docsDir: docsFile_valid_req_body_oas3_yaml });
-      const routerConfig1 = { prefix: '/api1' };
-      const routerConfig2 = { prefix: '/api2' };
-      const routerConfig3 = { prefix: '/api3' };
-      const router = new Router(routerConfig1);
-      await OpenapiRouter.Start(TestSuite.app,
-        [
-          { router, config: config1 },
-          { router: routerConfig2, config: config2 },
-          { router: routerConfig3, config: config3 },
-        ]);
-      attachmentJsonByObj([{ routerConfig1, config1 }, { routerConfig2, config2 }, { routerConfig3, config3 }]);
+      const config1 = extend(true, {}, defaultOpenapiRouterConfig, { routerPrefix: '/api1', docsDir: docsFile_create_oas3_json });
+      const config2 = extend(true, {}, defaultOpenapiRouterConfig, { routerPrefix: '/api2', docsDir: docsFile_valid_req_para_oas3_json });
+      const config3 = extend(true, {}, defaultOpenapiRouterConfig, { routerPrefix: '/api3', docsDir: docsFile_valid_req_body_oas3_yaml });
+      await OpenapiRouter.Start(TestSuite.app, [ config1, config2, config3 ]);
+      attachmentJsonByObj([ config1, config2, config3 ]);
       attachmentUtf8FileAuto(config1.docsDir);
       attachmentUtf8FileAuto(config2.docsDir);
       attachmentUtf8FileAuto(config3.docsDir);
