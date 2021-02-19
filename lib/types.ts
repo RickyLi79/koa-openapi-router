@@ -13,10 +13,10 @@ export type KoaControllerAction = (ctx: IRouterContext, next?: Next) => Promise<
 export type IOpenapiRouterOptions = {
   logger?: ILogger,
   isEggApp?: boolean,
-  useAllowedMethods?:boolean,
+  useAllowedMethods?: boolean,
 };
 
-export type IOptionalOpenapiRouterConfig = PowerPartial<IOpenapiRouterConfig> & { controllerDir: string, docsDir: string };
+export type IOptionalOpenapiRouterConfig = PowerPartial<IOpenapiRouterConfig>;
 
 export type IOpenapiRouterConfig = {
 
