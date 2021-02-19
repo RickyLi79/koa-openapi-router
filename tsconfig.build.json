@@ -26,6 +26,6 @@
   "exclude": [
     "node_modules*",
     "allure.test",
-    "example"
+    "test"
   ]
 }

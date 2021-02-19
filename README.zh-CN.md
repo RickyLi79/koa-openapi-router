@@ -23,7 +23,7 @@ npm i -S @rickyli79/koa-openapi-router
 ```
 
 #### 使用示例
-[Example](./example)
+[Example](./test)
 
 #### 测试报告
 - [Allure Report](https://rickyli79.gitee.io/testing-reports/koa-openapi-router/allure-report/)
