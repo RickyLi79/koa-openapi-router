@@ -12,7 +12,7 @@
     "allure:report": "allure generate allure-results --clean -o allure-report && allure open -h localhost -p 5501 allure-report",
     "allure:clean": "rimraf ./allure-results",
     "allure:test": "npm run allure:clean && node sleep.js 1 && mocha -R mocha-multi-reporters --reporter-options configFile=mocha-multi-reporters.json --timeout 5000 --colors --require ts-node/register allure.test/**/*.allure.ts",
-    "example" : "mocha --require ts-node/register test/example.test.ts"
+    "example": "mocha --require ts-node/register test/example.test.ts"
   },
   "keywords": [
     "koa",
@@ -31,11 +31,11 @@
   "devDependencies": {
     "@testdeck/mocha": "^0.1.2",
     "@types/extend": "^3.0.1",
-    "@types/koa": "^2.11.8",
+    "@types/koa": "^2.13.0",
     "@types/koa-bodyparser": "^4.3.0",
     "@types/koa-router": "^7.4.1",
     "@types/mocha": "^8.2.1",
-    "@types/node": "^14.14.28",
+    "@types/node": "^14.14.31",
     "@types/supertest": "^2.0.10",
     "@types/watch": "^1.0.1",
     "allure-js-commons": "2.0.0-beta.7",
@@ -48,7 +48,7 @@
     "mocha-multi-reporters": "^1.5.1",
     "rimraf": "^3.0.2",
     "supertest": "^6.1.3",
-    "supertest-allure-step-helper": "^0.1.1",
+    "supertest-allure-step-helper": "^0.2.0",
     "ts-node": "^9.1.1",
     "ts-test-decorators": "0.0.6",
     "tslib": "^2.1.0",

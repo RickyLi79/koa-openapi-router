@@ -22,6 +22,7 @@ const HEADER_MARKER_RESPONSE_CONTENT_TYPES = `${HEADER_MARKER}response-content-t
 
 export const OPENAPI_RQEUST_BODY_SCHEMA = `${OPEANAPI_PREFIX}request-bodySchema`;
 export const CTX_OPERATION_SCHEMA = Symbol(`OpenapiRouterAction#${OPERATION_SCHEMA}`);
+export const CTX_OPEANAPI_ROUTER = Symbol('OpenapiRouterAction#openapiRouter');
 
 export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
   return async (ctx: IRouterContext, next: Next) => {
@@ -45,11 +46,13 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
       ctx.set(TEST_RESPONSE_HEADER_REQUEST_SCHEMA, JSON.stringify(operation));
     }
 
-    if (actionInfo?.action === undefined) {
+    if (actionInfo.proxyAction === undefined && actionInfo.action === undefined) {
       ctx.status = 501;
       return;
     }
 
+
+    ctx[CTX_OPEANAPI_ROUTER] = openapiRouter;
     const doc_ver: 2 | 3 = operation[X_OAS_VER];
     if (config.validSchema.request) {
       let bodyRequired = false;
@@ -189,7 +192,8 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
     if (OpenapiRouter.isEggApp) {
       await next();
     } else {
-      await actionInfo.action!(ctx, next);
+
+      await (actionInfo.proxyAction ?? actionInfo.action!)(ctx, next);
     }
 
     if (config.validSchema.reponse) {

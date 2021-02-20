@@ -2,11 +2,12 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
 import extend from 'extend';
 import * as fs from 'fs';
-import Router from 'koa-router';
+import { Next } from 'koa';
+import Router, { IRouterContext } from 'koa-router';
 import * as path from 'path';
 import * as watch from 'watch';
 import { FileOrFiles } from 'watch';
-import OpenapiRouterAction from './OpenapiRouterAction';
+import OpenapiRouterAction, { CTX_OPEANAPI_ROUTER } from './OpenapiRouterAction';
 import { defaultOpenapiRouterConfig } from './OpenapiRouterConfig';
 import { ILogger, IOpenapiRouterConfig, IOpenapiRouterOptions, IOptionalOpenapiRouterConfig, KoaControllerAction, OperationSchema } from './types';
 
@@ -15,7 +16,7 @@ const OPENAPI_ROUTER_MIDDLEWARE = Symbol('OpenapiRouter#openapiRouterMiddlerware
 export const X_OAS_VER = 'x-oas-ver';
 const X_CONTROLLER = 'x-controller';
 
-export type KoaControllerActionInfo = { file: string, func: string, action?: KoaControllerAction, ctl?: any };
+export type KoaControllerActionInfo = { file: string, func: string, action?: KoaControllerAction, ctl?: any, proxyAction?:(ctx:IRouterContext, next?:Next)=>Promise<any> };
 
 const OPENAPI_FILE_EXTS = { '.json': true, '.yaml': true, '.yml': true };
 function isDocsExt(file: string) {
@@ -211,7 +212,8 @@ export class OpenapiRouter {
       return {
         file: '---',
         func: '<proxy action>',
-        action: this.proxyAction,
+        // action: this.proxyAction,
+        proxyAction: this.proxyAction,
       };
     }
     let actionInfo: KoaControllerActionInfo = this.koaControllerActionMap[opt];
@@ -269,12 +271,12 @@ export class OpenapiRouter {
 
       actionInfo.func = func;
       if (typeof actionInfo.action === 'function') {
-        this.koaControllerActionMap[opt] = actionInfo;
         actionInfo.ctl = ctl;
         // actionInfo.action = actionInfo.action.bind(ctl);
       } else {
         actionInfo.action = undefined;
       }
+      this.koaControllerActionMap[opt] = actionInfo;
     }
     return actionInfo;
   }
@@ -509,13 +511,13 @@ export class OpenapiRouter {
       if (actionInfo.action) {
         OpenapiRouter.app.router[method.toLowerCase()](
           path,
-          this.action,
+          this.action, proxyActionMw,
           actionInfo.action,
         );
       } else {
         OpenapiRouter.app.router[method.toLowerCase()](
           path,
-          this.action,
+          this.action, proxyActionMw,
         );
       }
     } else {
@@ -524,5 +526,14 @@ export class OpenapiRouter {
         this.action,
       );
     }
+  }
+}
+
+function proxyActionMw(ctx:IRouterContext, next:Next) {
+  const proxyAction = ctx[CTX_OPEANAPI_ROUTER]?.proxyAction;
+  if (proxyAction) {
+    proxyAction(<any>ctx, next);
+  } else {
+    next();
   }
 }
