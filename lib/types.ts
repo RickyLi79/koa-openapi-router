@@ -14,6 +14,7 @@ export type IOpenapiRouterOptions = {
   logger?: ILogger,
   isEggApp?: boolean,
   useAllowedMethods?: boolean,
+  proxyAcition?:KoaControllerAction
 };
 
 export type IOptionalOpenapiRouterConfig = PowerPartial<IOpenapiRouterConfig>;

@@ -86,6 +86,7 @@ export class OpenapiRouter {
   private static app: any;
   public static async Start(app: any, configs: IOptionalOpenapiRouterConfig | (IOptionalOpenapiRouterConfig[]), options?: IOpenapiRouterOptions) {
     if (options?.logger) this.logger = options?.logger;
+    if (options?.proxyAcition !== undefined) this.proxyAction = options.proxyAcition;
     this.app = app;
     this.isEggApp = !!options?.isEggApp;
     if (!Array.isArray(configs)) { configs = [ configs ]; }
@@ -185,12 +186,21 @@ export class OpenapiRouter {
 
   // #endregion
 
+  private _proxyAction ?: KoaControllerAction;
+  public static proxyAction ?: KoaControllerAction;
+
+
   /**
    * if set, all request will lead to this method.
    *
    * set `undefined` to resume normal mode
    */
-  public proxyAction?: KoaControllerAction;
+  public get proxyAction() {
+    return this._proxyAction ?? OpenapiRouter.proxyAction;
+  }
+  public set proxyAction(value:KoaControllerAction|undefined) {
+    this._proxyAction = value;
+  }
   private koaControllerActionMap: { [opt: string]: KoaControllerActionInfo } = {};
 
   /**
