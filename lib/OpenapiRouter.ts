@@ -231,12 +231,14 @@ export class OpenapiRouter {
       ctl = OpenapiRouter.app.controller;
       const ctlDirs = this.config.controllerDir.split('/');
       for (const iDir of ctlDirs) {
+        if (iDir === '') continue;
         ctl = ctl?.[iDir];
         if (!ctl) { break; }
       }
       const controllerPath = tag.split('/');
 
       for (const iPath of controllerPath) {
+        if (iPath === '') continue;
         ctl = ctl?.[iPath];
         if (!ctl) { break; }
       }
