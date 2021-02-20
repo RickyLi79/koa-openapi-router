@@ -1,17 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as jsonschema from 'jsonschema';
-import { Next } from 'koa';
-import { IRouterContext } from 'koa-router';
 import { OpenapiRouter, X_OAS_VER } from './OpenapiRouter';
 import { TEST_RESPONSE_HEADER_CONTROLLER_FILE, TEST_RESPONSE_HEADER_REQUEST_SCHEMA, TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS } from './Test-Response-Header';
 import { OperationSchema, OPERATION_SCHEMA, Schema } from './types';
-
-declare module 'koa-router'{
-  interface IRouterContext{
-    getOperation():OperationSchema;
-    getRequestBodySchema():Schema;
-  }
-}
 
 const OPEANAPI_PREFIX = 'x-openapi-';
 
@@ -25,7 +16,7 @@ export const CTX_OPERATION_SCHEMA = Symbol(`OpenapiRouterAction#${OPERATION_SCHE
 export const CTX_OPEANAPI_ROUTER = Symbol('OpenapiRouterAction#openapiRouter');
 
 export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
-  return async (ctx: IRouterContext, next: Next) => {
+  return async (ctx: any, next: any) => {
 
     const prefix = (<any>ctx.router).opts.prefix ?? '';
     const opt = `${ctx.method.toUpperCase()} ${(<any>ctx).routerPath.substr(prefix.length)}`;
@@ -306,11 +297,11 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
   };
 }
 
-function getOperation(this: IRouterContext): OperationSchema {
+function getOperation(this: any): OperationSchema {
   return this[CTX_OPERATION_SCHEMA];
 }
 
-function getRequestBodySchema(this: IRouterContext): Schema {
+function getRequestBodySchema(this: any): Schema {
   return this[OPENAPI_RQEUST_BODY_SCHEMA];
 }
 
