@@ -25,5 +25,7 @@ npm i -S @rickyli79/koa-openapi-router
 [Example](./test)
 
 #### Test Report
-- [Allure Report](https://rickyli79.github.io/testing-reports/koa-openapi-router/allure-report/)
+- [Allure Report v1.1.0](https://rickyli79.github.io/testing-reports/koa-openapi-router/allure-report/)
 
+#### egg-plugin version
+https://github.com/RickyLi79/egg-openapi-router
