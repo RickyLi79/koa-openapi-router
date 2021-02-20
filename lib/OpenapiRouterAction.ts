@@ -18,8 +18,8 @@ export const CTX_OPEANAPI_ROUTER = Symbol('OpenapiRouterAction#openapiRouter');
 export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
   return async (ctx: any, next: any) => {
 
-    const prefix = (<any>ctx.router).opts.prefix ?? '';
-    const opt = `${ctx.method.toUpperCase()} ${(<any>ctx).routerPath.substr(prefix.length)}`;
+    // const prefix = (<any>ctx.router).opts.prefix ?? '';
+    const opt = `${ctx.method.toUpperCase()} ${ctx.routerPath}`;
 
     const operation: OperationSchema = openapiRouter.getOperationByOpt(opt);
 

@@ -228,8 +228,14 @@ export class OpenapiRouter {
 
     let ctl: any;
     if (OpenapiRouter.isEggApp) {
-      const controllerPath = tag.split('/');
       ctl = OpenapiRouter.app.controller;
+      const ctlDirs = this.config.controllerDir.split('/');
+      for (const iDir of ctlDirs) {
+        ctl = ctl?.[iDir];
+        if (!ctl) { break; }
+      }
+      const controllerPath = tag.split('/');
+
       for (const iPath of controllerPath) {
         ctl = ctl?.[iPath];
         if (!ctl) { break; }
@@ -473,7 +479,7 @@ export class OpenapiRouter {
       const iPathItem = api.paths[iPath];
       for (const iMethod in iPathItem) {
         const iPath2 = iPath.replace(/{/g, ':').replace(/}/g, ''); // /api/{user}/{id} => /api/:user/:id
-        const opt = iMethod.toUpperCase() + ' ' + iPath2;
+        const opt = iMethod.toUpperCase() + ' ' + this.config.routerPrefix + iPath2;
         if (this.operationMap[opt] !== undefined) {
           this.logger.warn(`duplicate operation : '${opt}' in '${filename}' OVERWRITED`);
           // continue;
