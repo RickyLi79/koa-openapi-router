@@ -1,4 +1,11 @@
 # @rickyli79/koa-openapi-router
+[![NPM version][npm-image]][npm-url]
+[![npm download][download-image]][download-url]
+
+[npm-image]: https://img.shields.io/npm/v/@rickyli79/koa-openapi-router.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/@rickyli79/koa-openapi-router
+[download-image]: https://img.shields.io/npm/dm/@rickyli79/koa-openapi-router.svg?style=flat-square
+[download-url]: https://npmjs.org/package/@rickyli79/koa-openapi-router
 
 [[English]](./README.md) | 简体中文
 
@@ -26,7 +33,7 @@ npm i -S @rickyli79/koa-openapi-router
 [Example](./test)
 
 #### 测试报告
-- [Allure Report v1.1.0](https://rickyli79.gitee.io/testing-reports/koa-openapi-router/allure-report/)
+[Allure Report](https://rickyli79.gitee.io/testing-reports/koa-openapi-router/allure-report/)
 
 #### egg-plugin version
 https://github.com/RickyLi79/egg-openapi-router
