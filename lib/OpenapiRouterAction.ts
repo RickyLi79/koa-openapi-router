@@ -37,7 +37,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
       ctx.set(TEST_RESPONSE_HEADER_REQUEST_SCHEMA, JSON.stringify(operation));
     }
 
-    if (actionInfo.proxyAction === undefined && actionInfo.action === undefined) {
+    if (actionInfo?.proxyAction === undefined && actionInfo?.action === undefined) {
       ctx.status = 501;
       return;
     }
