@@ -1,4 +1,3 @@
-/* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as jsonschema from 'jsonschema';
 import { Next } from 'koa';
@@ -188,7 +187,12 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
     ctx[CTX_OPERATION_SCHEMA] = operation;
     ctx.getOperation = getOperation.bind(ctx);
     ctx.getRequestBodySchema = getRequestBodySchema.bind(ctx);
-    await actionInfo.action!(ctx, next);
+
+    if (OpenapiRouter.isEggApp) {
+      await next();
+    } else {
+      await actionInfo.action!(ctx, next);
+    }
 
     if (config.validSchema.reponse) {
       do {
@@ -264,7 +268,8 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
               ctx.response.set(TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '415');
               break;
             }
-            const resContentSchema = doc_ver === 2 ? (<any>reponseSchema)?.schema : reponseSchema?.content![contentType!]?.schema;
+
+            const resContentSchema = doc_ver === 2 ? (<any>reponseSchema)?.schema : reponseSchema?.content?.[contentType ?? 'default']?.schema;
             if (resContentSchema !== undefined) {
               try {
                 jsonschema.validate(ctx.body, resContentSchema, { throwError: true, throwFirst: true });
@@ -278,7 +283,6 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
             }
           } catch (err) {
             OpenapiRouter.logger.error(err);
-            debugger;
           }
         } else {
           if (config.test.enabled) {

@@ -15,7 +15,7 @@ const OPENAPI_ROUTER_MIDDLEWARE = Symbol('OpenapiRouter#openapiRouterMiddlerware
 export const X_OAS_VER = 'x-oas-ver';
 const X_CONTROLLER = 'x-controller';
 
-type KoaControllerActionInfo = { file: string, func: string, action?: KoaControllerAction };
+export type KoaControllerActionInfo = { file: string, func: string, action?: KoaControllerAction, ctl?: any };
 
 const OPENAPI_FILE_EXTS = { '.json': true, '.yaml': true, '.yml': true };
 function isDocsExt(file: string) {
@@ -56,7 +56,9 @@ export class OpenapiRouter {
 
     this.config = extend(true, {}, defaultOpenapiRouterConfig, config);
 
-    this._router = new Router({ prefix: config.routerPrefix });
+    if (!OpenapiRouter.isEggApp) {
+      this._router = new Router({ prefix: config.routerPrefix });
+    }
     this.proxyAction = config.proxyAction;
     OpenapiRouter._openapiRouters.push(this);
   }
@@ -91,9 +93,11 @@ export class OpenapiRouter {
     for (const iConfig of configs) {
       const openapiRouter = new OpenapiRouter(iConfig);
       promiseArr.push(openapiRouter.loadOpenapi());
-      app.use(openapiRouter._router.routes());
-      if (options?.useAllowedMethods) {
-        app.use(openapiRouter._router.allowedMethods());
+      if (!this.isEggApp) {
+        app.use(openapiRouter._router.routes());
+        if (options?.useAllowedMethods) {
+          app.use(openapiRouter._router.allowedMethods());
+        }
       }
     }
     await Promise.all(promiseArr);
@@ -192,7 +196,7 @@ export class OpenapiRouter {
   /**
    * @private
    */
-  public getKoaControllerAction(opt: string, qry?: { method: string, path: string }): KoaControllerActionInfo {
+  public getKoaControllerAction(opt: string, qry?: { method: string, path: string }, force = false): KoaControllerActionInfo {
     if (this.proxyAction) {
       return {
         file: '---',
@@ -201,11 +205,12 @@ export class OpenapiRouter {
       };
     }
     let actionInfo: KoaControllerActionInfo = this.koaControllerActionMap[opt];
-    if (actionInfo !== undefined || qry === undefined) {
+    if (!force && (actionInfo !== undefined || qry === undefined)) {
       return actionInfo;
     }
     const operation: any = this.getOperationByOpt(opt);
     const tag: string = operation[X_CONTROLLER] ?? operation.tags?.[0] ?? 'default';
+    qry = qry!;
     actionInfo = { file: tag + '.js', func: qry.method.toUpperCase() + ' ' + qry.path };
 
 
@@ -215,6 +220,7 @@ export class OpenapiRouter {
       ctl = OpenapiRouter.app.controller;
       for (const iPath of controllerPath) {
         ctl = ctl?.[iPath];
+        if (!ctl) { break; }
       }
     } else {
 
@@ -254,6 +260,10 @@ export class OpenapiRouter {
       actionInfo.func = func;
       if (typeof actionInfo.action === 'function') {
         this.koaControllerActionMap[opt] = actionInfo;
+        actionInfo.ctl = ctl;
+        // actionInfo.action = actionInfo.action.bind(ctl);
+      } else {
+        actionInfo.action = undefined;
       }
     }
     return actionInfo;
@@ -463,7 +473,7 @@ export class OpenapiRouter {
         iOperation[X_OAS_VER] = specVersion;
         this.operationMap[opt] = iOperation;
         const actionInfo = this.getKoaControllerAction(opt, { method: iMethod, path: iPath2 });
-        this.addRouter(iMethod, iPath2);
+        this.addRouter(iMethod, iPath2, actionInfo);
         // const fullOpt = `${iMethod.toUpperCase()} ${this.routerPrefix}${iPath2}`;
         if (actionInfo.action !== undefined) {
           this.logger.debug(`openapi-router connected success : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
@@ -483,10 +493,26 @@ export class OpenapiRouter {
     return this[OPENAPI_ROUTER_MIDDLEWARE];
   }
 
-  private addRouter(method: string, path: string) {
-    this._router[method.toLowerCase()](
-      path,
-      this.action,
-    );
+  private addRouter(method: string, path: string, actionInfo: KoaControllerActionInfo) {
+    if (OpenapiRouter.isEggApp) {
+      path = this.config.routerPrefix + path;
+      if (actionInfo.action) {
+        OpenapiRouter.app.router[method.toLowerCase()](
+          path,
+          this.action,
+          actionInfo.action,
+        );
+      } else {
+        OpenapiRouter.app.router[method.toLowerCase()](
+          path,
+          this.action,
+        );
+      }
+    } else {
+      this._router[method.toLowerCase()](
+        path,
+        this.action,
+      );
+    }
   }
 }
