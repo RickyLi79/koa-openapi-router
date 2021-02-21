@@ -181,7 +181,12 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
     ctx.getRequestBodySchema = getRequestBodySchema.bind(ctx);
 
     if (OpenapiRouter.isEggApp) {
-      await next();
+      if (actionInfo.proxyAction !== undefined) {
+        actionInfo.proxyAction(ctx, next);
+      } else {
+        await next();
+      }
+      // await next();
     } else {
 
       await (actionInfo.proxyAction ?? actionInfo.action!)(ctx, next);
@@ -193,7 +198,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
         const reponseSchema = operation.responses[ctx.status];
         const resHeaders = reponseSchema?.headers;
         for (const iHeaderName in resHeaders) {
-          let iHaderValue:any = ctx.response.get(iHeaderName);
+          let iHaderValue: any = ctx.response.get(iHeaderName);
           if (resHeaders[iHeaderName].required === true && !iHaderValue) {
             OpenapiRouter.logger.error(new SyntaxError(`'${iHeaderName}' in 'response.header' required`));
             if (config.test.enabled) {
@@ -207,7 +212,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
               if (schema.type !== 'string') {
                 if (schema.type === 'integer') {
                   iHaderValue = Number.parseInt(iHaderValue);
-                } else if (schema.type === 'float') {
+                } else if (schema.type === 'number') {
                   iHaderValue = Number.parseFloat(iHaderValue);
                 }
               }
