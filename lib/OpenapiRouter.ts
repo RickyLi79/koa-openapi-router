@@ -87,7 +87,7 @@ export class OpenapiRouter {
   private static app: any;
   public static async Start(app: any, configs: IOptionalOpenapiRouterConfig | (IOptionalOpenapiRouterConfig[]), options?: IOpenapiRouterOptions) {
     if (options?.logger) this.logger = options?.logger;
-    if (options?.proxyAcition !== undefined) this.proxyAction = options.proxyAcition;
+    if (options?.proxyAction !== undefined) this.proxyAction = options.proxyAction;
     this.app = app;
     this.isEggApp = !!options?.isEggApp;
     if (!Array.isArray(configs)) { configs = [ configs ]; }
@@ -495,7 +495,9 @@ export class OpenapiRouter {
         const actionInfo = this.getKoaControllerAction(opt, { method: iMethod, path: iPath2 });
         this.addRouter(iMethod, iPath2, actionInfo);
         // const fullOpt = `${iMethod.toUpperCase()} ${this.routerPrefix}${iPath2}`;
-        if (actionInfo.action !== undefined) {
+        if (actionInfo.proxyAction !== undefined) {
+          this.logger.debug(`openapi-router connected success : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' by 'proxyAction'`);
+        } else if (actionInfo.action !== undefined) {
           this.logger.debug(`openapi-router connected success : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
         } else {
           this.logger.error(`openapi-router connect failed : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);

@@ -1,5 +1,3 @@
-import { Next } from 'koa';
-import { IRouterContext } from 'koa-router';
 
 export interface ILogger {
   error(msg: any, ...args: any[]): void;
@@ -8,13 +6,13 @@ export interface ILogger {
   debug(msg: any, ...args: any[]): void;
 }
 
-export type KoaControllerAction = (ctx: IRouterContext, next?: Next) => Promise<any>;
+export type KoaControllerAction = (ctx: any, next?: () => Promise<any>) => Promise<any>;
 
 export type IOpenapiRouterOptions = {
   logger?: ILogger,
   isEggApp?: boolean,
   useAllowedMethods?: boolean,
-  proxyAcition?:KoaControllerAction
+  proxyAction?: KoaControllerAction
 };
 
 export type IOptionalOpenapiRouterConfig = PowerPartial<IOpenapiRouterConfig>;
