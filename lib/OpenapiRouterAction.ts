@@ -62,6 +62,8 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
               para = queries[iOpt.name];
               if (para === undefined) break;
               switch (iOpt.style) {
+                case 'form':
+                  break;
                 case 'pipeDelimited':
                   {
                     const arr: string[] = para[0].split('|');
