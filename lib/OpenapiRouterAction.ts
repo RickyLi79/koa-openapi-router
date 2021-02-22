@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import * as jsonschema from 'jsonschema';
+import { toQueries } from './extend';
 import { OpenapiRouter, X_OAS_VER } from './OpenapiRouter';
 import { TEST_RESPONSE_HEADER_CONTROLLER_FILE, TEST_RESPONSE_HEADER_REQUEST_SCHEMA, TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS } from './Test-Response-Header';
 import { OperationSchema, OPERATION_SCHEMA, Schema } from './types';
@@ -45,6 +45,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
 
     ctx[CTX_OPEANAPI_ROUTER] = openapiRouter;
     const doc_ver: 2 | 3 = operation[X_OAS_VER];
+    const queries = ctx.queries ?? toQueries(ctx.request.querystring);
     if (config.validSchema.request) {
       let bodyRequired = false;
       let bodySchema: any;
@@ -58,7 +59,32 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
               para = ctx.params[iOpt.name];
               break;
             case 'query':
-              para = ctx.query[iOpt.name];
+              para = queries[iOpt.name];
+              if (para === undefined) break;
+              switch (iOpt.style) {
+                case 'pipeDelimited':
+                  {
+                    const arr: string[] = para[0].split('|');
+                    para = {};
+                    for (let i = 0; i < arr.length; i += 2) {
+                      para[arr[i]] = arr[i + 1];
+                    }
+                  }
+                  break;
+                case 'spaceDelimited':
+                  {
+                    const arr: string[] = para[0].split(' ');
+                    para = {};
+                    for (let i = 0; i < arr.length; i += 2) {
+                      para[arr[i]] = arr[i + 1];
+                    }
+                  }
+                  break;
+                default:
+                  para = para[0];
+                  break;
+
+              }
               break;
             case 'header':
               para = ctx.get(iOpt.name);
@@ -84,18 +110,11 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
 
           if (para !== undefined) {
             try {
-              if (iOpt.schema.type !== 'string') {
-                if (iOpt.schema.type === 'integer') {
-                  para = Number.parseInt(para);
-                } else if (iOpt.schema.type === 'float') {
-                  para = Number.parseFloat(para);
-                }
-              }
-              jsonschema.validate(para, iOpt.schema, { throwFirst: true, throwError: true });
+              jsonschema.validate({ value: para }, { type: 'object', properties: { value: iOpt.schema } }, { throwFirst: true, throwError: true, preValidateProperty, rewrite });
             } catch (err) {
               ctx.status = 422;
               const e: jsonschema.ValidationError = err.errors[0];
-              const re: any = { location, property: e.property, message: e.message };
+              const re = { location, property: iOpt.name, instance: e.instance, message: e.message };
               ctx.body = re;
               return;
             }
@@ -130,7 +149,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
           operation[HEADER_MARKER_REQUEST_BODY_REQUIRED] = requestBodyRequired ?? false;
         }
 
-        const ctxContentType = ctx.request.get('content-type');
+        const ctxContentType = ctx.type;
         if (acceptContentTypes) {
           if (acceptContentTypes[ctxContentType]) {
             contentType = ctxContentType;
@@ -163,11 +182,11 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
         } else if (reqBodySchema) {
 
           try {
-            jsonschema.validate(ctx.request.body, reqBodySchema, { throwError: true, throwFirst: true });
+            jsonschema.validate({ value: ctx.request.body }, { type: 'object', properties: { value: reqBodySchema } }, { throwError: true, throwFirst: true, preValidateProperty, rewrite });
           } catch (err) {
             ctx.status = 422;
             const e: jsonschema.ValidationError = err.errors[0];
-            const re: any = { location: 'body', property: e.property, message: e.message };
+            const re = { location: 'body', property: e.path, instance: e.instance, message: e.message };
             ctx.body = re;
             return;
           }
@@ -212,11 +231,11 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
               if (schema.type !== 'string') {
                 if (schema.type === 'integer') {
                   iHaderValue = Number.parseInt(iHaderValue);
-                } else if (schema.type === 'number') {
+                } else if (schema.type === 'float') {
                   iHaderValue = Number.parseFloat(iHaderValue);
                 }
               }
-              jsonschema.validate(iHaderValue, schema, { throwFirst: true, throwError: true });
+              jsonschema.validate(iHaderValue, schema, { throwFirst: true, throwError: true, preValidateProperty });
             } catch (err) {
               OpenapiRouter.logger.error(err.errors[0]);
               if (config.test.enabled) {
@@ -248,7 +267,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
               reponseSchema[HEADER_MARKER_RESPONSE_CONTENT_TYPES] = responseContentTypes;
             }
 
-            const ctxContentType = ctx.response.get('content-type');
+            const ctxContentType = ctx.response.type;
             if (responseContentTypes) {
               if (responseContentTypes[ctxContentType]) {
                 contentType = ctxContentType;
@@ -270,7 +289,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
             const resContentSchema = doc_ver === 2 ? (<any>reponseSchema)?.schema : reponseSchema?.content?.[contentType ?? 'default']?.schema;
             if (resContentSchema !== undefined) {
               try {
-                jsonschema.validate(ctx.body, resContentSchema, { throwError: true, throwFirst: true });
+                jsonschema.validate(ctx.body, resContentSchema, { throwError: true, throwFirst: true, preValidateProperty });
               } catch (err) {
                 OpenapiRouter.logger.error(err.errors[0]);
                 if (config.test.enabled) {
@@ -310,34 +329,34 @@ function getRequestBodySchema(this: any): Schema {
   return this[OPENAPI_RQEUST_BODY_SCHEMA];
 }
 
-/*
-function preValidateProperty(instance: any, _key: string, schema: Schema): any {
-  if (typeof instance === 'string' && schema.type) {
+function preValidateProperty(instance: any, key: string, schema: any): any {
+  if (typeof instance[key] === 'string' && schema.type) {
     let result: number;
     switch (schema.type) {
       case 'integer':
-        result = Number.parseInt(instance);
-        return result ? result : 0;
+        result = Number.parseInt(instance[key]);
+        instance[key] = result ? result : instance[key];
+        return;
       case 'number':
-        result = Number.parseFloat(instance);
-        return result ? result : 0;
+        result = Number.parseFloat(instance[key]);
+        instance[key] = result ? result : instance[key];
+        return;
       case 'object':
       case 'array':
       case 'boolean':
         try {
-          return JSON.parse(instance);
+          instance[key] = JSON.parse(instance[key]);
+          return;
         } catch (err) {
-          return instance;
+          return;
         }
 
       default:
-        return instance;
     }
   }
-  return instance;
 }
 
-function rewrite(instance: any, schema: Schema): any {
+function rewrite(instance: any, schema: any): any {
   if (
     typeof instance === 'string'
     && ((Array.isArray(schema.type) && schema.type.includes('string')) || schema.type === 'string')
@@ -353,4 +372,3 @@ function rewrite(instance: any, schema: Schema): any {
   }
   return instance;
 }
- */

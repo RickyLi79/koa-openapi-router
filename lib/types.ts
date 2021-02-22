@@ -166,8 +166,9 @@ export interface OperationSchema {
   tags?: string[];
   parameters?: {
     name: string;
-    in: 'path' | 'query' | 'header' | 'cookie' | 'body',
-    schema: Schema,
+    in: 'path' | 'query' | 'header' | 'cookie' | 'body';
+    style?: string;
+    schema: Schema;
     required?: boolean
   }[];
   responses: {
