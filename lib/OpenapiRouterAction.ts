@@ -151,7 +151,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
           operation[HEADER_MARKER_REQUEST_BODY_REQUIRED] = requestBodyRequired ?? false;
         }
 
-        const ctxContentType = ctx.type;
+        const ctxContentType = ctx.request.type;
         if (acceptContentTypes) {
           if (acceptContentTypes[ctxContentType]) {
             contentType = ctxContentType;
@@ -201,16 +201,19 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
     ctx.getOperation = getOperation.bind(ctx);
     ctx.getRequestBodySchema = getRequestBodySchema.bind(ctx);
 
+    let re: any;
     if (OpenapiRouter.isEggApp) {
       if (actionInfo.proxyAction !== undefined) {
-        actionInfo.proxyAction(ctx, next);
+        re = actionInfo.proxyAction(ctx, next);
       } else {
-        await next();
+        re = next();
       }
       // await next();
     } else {
-
-      await (actionInfo.proxyAction ?? actionInfo.action!)(ctx, next);
+      re = (actionInfo.proxyAction ?? actionInfo.action!)(ctx, next);
+    }
+    if (re instanceof Promise) {
+      await re;
     }
 
     if (config.validSchema.reponse) {
@@ -311,7 +314,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
         }
 
         ctx.response.set(TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '200');
-        // eslint-disable-next-line no-constant-condition
+      // eslint-disable-next-line no-constant-condition
       } while (false);
 
       if (config.test.enabled) {

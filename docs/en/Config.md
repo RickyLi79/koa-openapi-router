@@ -17,9 +17,9 @@ English | [[简体中文]](../../README.zh-CN.md)
 export type IOpenapiRouterConfig = {
 
   /**
-   * Prefix for all routes.
+   * Prefix for koa-router.
    */
-  prefix?: string;
+  routerPrefix: string;
 
   /**
    * controller folder name
@@ -86,7 +86,7 @@ export type IOpenapiRouterConfig = {
 };
 ```
 
-#### Init by `getConfig()`
+#### Init config `createOpenapiRouterConfig()`
 ```ts
 import { createOpenapiRouterConfig } from '@rickyli79/koa-openapi-router';
 const config = createOpenapiRouterConfig({
@@ -96,19 +96,6 @@ const config = createOpenapiRouterConfig({
 });
 ```
 
-#### Init by `new ()`
-```ts
-import { OpenapiRouter } from '@rickyli79/koa-openapi-router';
-const router = new Router();
-const openapiRouter = new OpenapiRouter(
-  {
-    routerPrefix: '/my/api',
-    controllerDir: path.join(process.cwd(), 'controller'),
-    docsDir: path.join(process.cwd(), 'oas-doc'),
-  });
-openapiRouter.loadOpenapi();
-app.use(router.routes());  // same as : app.use(openapiRouter.getRouter().routes());
-```
 #### Init by `OpenapiRouter.Start()`
 ```ts
 import { OpenapiRouter } from '@rickyli79/koa-openapi-router';
@@ -121,3 +108,44 @@ OpenapiRouter.Start(app,
   }
 );
 ```
+
+
+#### More for `config.routerPrefix`
+Besides `config.routerPrefix`, prefix can be declared in the OpenAPI document through `x-path-prefix`.
+```ts
+// app init
+OpenapiRouter.Start(app, 
+  {
+    routerPrefix: '/top/prefix',
+    controllerDir: path.join(process.cwd(), 'controller'),
+    docsDir: path.join(process.cwd(), 'oas-doc/my.oas3.yaml'),
+  }
+);
+```
+```yaml
+# oas-doc/my.oas3.yaml
+openapi: 3.0.0
+info:
+  title: "API"
+  version: "1.0.0"
+x-path-prefix: /my/api # all paths in this doc with have this prefix
+paths:
+  /hello:
+    get:
+      responses: 
+        200:
+          description: ok
+```
+```ts
+// controller/defalut.js
+const Controller = require('egg').Controller;
+class HelloController extends Controller {
+  async 'GET /my/api/hello'( ctx ) {
+    ctx.status = 200;
+  }
+}
+module.exports = HelloController;
+```
+Then the `path` shuld be: `/top/prefix/my/api/hello`
+
+[Example of `prefix`](../../allure.test/suite/routerPrefix.allure.ts)

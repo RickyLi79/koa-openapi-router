@@ -77,9 +77,7 @@ class TestStoreStatic {
       const app: Koa = suite.app = new Koa();
       const server: http.Server = suite.sever = app.listen();
       app.use(bodyParser());
-      const openapiRouter = new OpenapiRouter(testConfig);
-      await openapiRouter.loadOpenapi();
-      app.use(openapiRouter.getRouter().routes());
+      await OpenapiRouter.Start(app, testConfig);
 
       await supertest.agent(server)
         .get('/no/such/path')

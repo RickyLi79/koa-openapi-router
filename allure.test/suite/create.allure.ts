@@ -14,7 +14,7 @@ import { OpenapiRouter } from '../../lib/OpenapiRouter';
 import { createOpenapiRouterConfig } from '../../lib/OpenapiRouterConfig';
 import { IOpenapiRouterConfig } from '../../lib/types';
 import { MutedLogger, TestStore } from '../TestStore';
-import { docsDir, docsFile_create_oas3_json, docsFile_valid_req_body_oas3_yaml, docsFile_valid_req_para_oas3_json } from './docs/docsPath';
+import { docsFile_create_oas3_json, docsFile_valid_req_body_oas3_yaml, docsFile_valid_req_para_oas3_json } from './docs/docsPath';
 
 let defaultOpenapiRouterConfig: IOpenapiRouterConfig;
 
@@ -78,7 +78,7 @@ export class TestSuite {
     TestSuite.allureAgentProxy = AllureStepProxy.create(agent);
     return TestSuite.allureAgentProxy!;
   }
-
+  /*
   @allureDecorators.severity(Severity.BLOCKER)
   @test('by `new OpenapiRouter()` , one doc-file')
   public async test1() {
@@ -147,7 +147,7 @@ export class TestSuite {
         .endAllureStep();
     }
   }
-
+ */
   @allureDecorators.severity(Severity.BLOCKER)
   @test('by `OpenapiRouter.Start()` , use `Router.IRouterOptions`')
   public async test3() {

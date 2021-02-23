@@ -17,9 +17,9 @@
 export type IOpenapiRouterConfig = {
 
   /**
-   * Prefix for all routes.
+   * Prefix for koa-router.
    */
-  prefix?: string;
+  routerPrefix: string;
 
   /**
    * controller folder name
@@ -86,33 +86,14 @@ export type IOpenapiRouterConfig = {
 };
 ```
 
-#### 通过`getConfig()`初始化
+#### 通过`createOpenapiRouterConfig()`初始化
 ```ts
-import { getConfig } from '@rickyli79/koa-openapi-router';
-const config = getConfig({
+import { createOpenapiRouterConfig } from '@rickyli79/koa-openapi-router';
+const config = createOpenapiRouterConfig({
   routerPrefix: '/my/api',
   controllerDir: path.join(process.cwd(), 'controller'),
   docsDir: path.join(process.cwd(), 'oas-doc'),
 });
-```
-
-#### 通过`new ()`初始化
-```ts
-import { OpenapiRouter } from '@rickyli79/koa-openapi-router';
-const router = new Router();
-const openapiRouter = new OpenapiRouter(
-  {
-    routerPrefix: '/my/api',
-    controllerDir: path.join(process.cwd(), 'controller'),
-    docsDir: path.join(process.cwd(), 'oas-doc'),
-  });
-openapiRouter.loadOpenapi();
-app.use(router.routes());  // same as : app.use(openapiRouter.getRouter().routes());
-
-/**
- * the follow code is NOT recommended when `config.watcher.enabled===true`
- */
-app.use(router.allowedMethods());
 ```
 #### 通过工厂方法`OpenapiRouter.Start()`初始化
 ```ts
@@ -126,3 +107,43 @@ OpenapiRouter.Start(app,
   }
 );
 ```
+
+#### 关于`config.routerPrefix`
+除了给定`config.routerPrefix`外，在Openapi文档中还可以通过`x-path-prefix`额外添加前缀。
+```ts
+// app init
+OpenapiRouter.Start(app, 
+  {
+    routerPrefix: '/top/prefix',
+    controllerDir: path.join(process.cwd(), 'controller'),
+    docsDir: path.join(process.cwd(), 'oas-doc/my.oas3.yaml'),
+  }
+);
+```
+```yaml
+# oas-doc/my.oas3.yaml
+openapi: 3.0.0
+info:
+  title: "API"
+  version: "1.0.0"
+x-path-prefix: /my/api
+paths:
+  /hello:
+    get:
+      responses: 
+        200:
+          description: ok
+```
+```ts
+// controller/defalut.js
+const Controller = require('egg').Controller;
+class HelloController extends Controller {
+  async 'GET /my/api/hello'( ctx ) {
+    ctx.status = 200;
+  }
+}
+module.exports = HelloController;
+```
+那么最终访问`path`应为: `/top/prefix/my/api/hello`
+
+[`prefix`详细例子](../../allure.test/suite/routerPrefix.allure.ts)

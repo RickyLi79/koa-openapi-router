@@ -16,7 +16,7 @@ const OPENAPI_ROUTER_MIDDLEWARE = Symbol('OpenapiRouter#openapiRouterMiddlerware
 export const X_OAS_VER = 'x-oas-ver';
 const X_CONTROLLER = 'x-controller';
 
-export type KoaControllerActionInfo = { file: string, func: string, action?: KoaControllerAction, ctl?: any, proxyAction?:(ctx:IRouterContext, next?:Next)=>Promise<any> };
+export type KoaControllerActionInfo = { file: string, func: string, action?: KoaControllerAction, ctl?: any, proxyAction?: (ctx: IRouterContext, next?: Next) => Promise<any> };
 
 const OPENAPI_FILE_EXTS = { '.json': true, '.yaml': true, '.yml': true };
 function isDocsExt(file: string) {
@@ -27,12 +27,12 @@ export class OpenapiRouter {
   // #region private
   // private static filesToConnect: string[];
 
-  private filesToConnect: string[];// 延迟读取api文档的临时任务列表
-  private docsRefs: { [doc: string]: Set<string> };// 记录单个文档被其它哪些文档引用过
+  private filesToConnect: string[] = [];// 延迟读取api文档的临时任务列表
+  private docsRefs: { [doc: string]: Set<string> } = {};// 记录单个文档被其它哪些文档引用过
 
-  private optInDoc: { [doc: string]: string[] };// 单个api文档中包含的所有operation
+  private optInDoc: { [doc: string]: string[] } = {};// 单个api文档中包含的所有operation
 
-  private operationMap: { [opt: string]: OperationSchema };// 整个router中已注册的url所对应的schema
+  private operationMap: { [opt: string]: OperationSchema } = {};// 整个router中已注册的url所对应的schema
   /**
    * @private
    */
@@ -78,7 +78,7 @@ export class OpenapiRouter {
     return `[OpenapiRouter (prefix=${this.config.routerPrefix})]`;
   }
 
-  private readonly _router: Router;
+  private readonly _router!: Router;
   public getRouter(): Router {
     return this._router;
   }
@@ -173,7 +173,7 @@ export class OpenapiRouter {
       delete this.filewatchs[filename];
     }
   }
-
+  /*
   private static outterFilewatchEventHandler(event: string, filename: string) {
     this.logger.debug('outterFilewatchEventHandler', event, filename);
     if (event === 'change') {
@@ -184,11 +184,11 @@ export class OpenapiRouter {
       });
     }
   }
-
+ */
   // #endregion
 
-  private _proxyAction ?: KoaControllerAction;
-  public static proxyAction ?: KoaControllerAction;
+  private _proxyAction?: KoaControllerAction;
+  public static proxyAction?: KoaControllerAction;
 
 
   /**
@@ -199,7 +199,7 @@ export class OpenapiRouter {
   public get proxyAction() {
     return this._proxyAction ?? OpenapiRouter.proxyAction;
   }
-  public set proxyAction(value:KoaControllerAction|undefined) {
+  public set proxyAction(value: KoaControllerAction | undefined) {
     this._proxyAction = value;
   }
   private koaControllerActionMap: { [opt: string]: KoaControllerActionInfo } = {};
@@ -224,7 +224,6 @@ export class OpenapiRouter {
     const tag: string = operation[X_CONTROLLER] ?? operation.tags?.[0] ?? 'default';
     qry = qry!;
     actionInfo = { file: tag + '.js', func: qry.method.toUpperCase() + ' ' + qry.path };
-
 
     let ctl: any;
     if (OpenapiRouter.isEggApp) {
@@ -300,14 +299,14 @@ export class OpenapiRouter {
 
   // #endregion
 
-  private watchMonitor: watch.Monitor;
-  private watchMonitorOutter: watch.Monitor;
+  private watchMonitor!: watch.Monitor;
+  // private watchMonitorOutter: watch.Monitor;
   /**
    * 重新扫描读取openapi文档
    *
    * load/reload OpenApi-doc
    */
-  public loadOpenapi() {
+  private loadOpenapi() {
     return new Promise<boolean>((resolve, rejects) => {
       let docsDir = this.config.docsDir;
       if (!fs.existsSync(docsDir)) {
@@ -340,7 +339,7 @@ export class OpenapiRouter {
       if (fs.statSync(docsDir).isFile()) {
         docFilename = docsDir;
         docsDir = path.dirname(docFilename);
-        this.logger.info(`scan file : ${docsDir}`);
+        this.logger.info(`scan file : ${docFilename}`);
       } else {
         this.logger.info(`scan dir : ${docsDir}`);
       }
@@ -361,13 +360,11 @@ export class OpenapiRouter {
         },
         async monitor => {
           this.watchMonitor = monitor;
-          // this.logger.info(monitor.files);
           const promisArr: Promise<any>[] = [];
           for (const iFilename in monitor.files) {
             const fsState: fs.Stats = monitor.files[iFilename];
             if (fsState.isFile()) {
               promisArr.push(this.connectOneApi(iFilename));
-              // promisArr.push(this.connectOneApi(iFilename));
             }
           }
           if (!this.config.watcher.enabled) {
@@ -476,11 +473,11 @@ export class OpenapiRouter {
         }
       }
     }
-
+    const prefix = api['x-path-prefix'] ?? '';
     for (const iPath in api.paths) {
       const iPathItem = api.paths[iPath];
       for (const iMethod in iPathItem) {
-        const iPath2 = iPath.replace(/{/g, ':').replace(/}/g, ''); // /api/{user}/{id} => /api/:user/:id
+        const iPath2 = prefix + iPath.replace(/{/g, ':').replace(/}/g, ''); // /api/{user}/{id} => /api/:user/:id
         const opt = iMethod.toUpperCase() + ' ' + this.config.routerPrefix + iPath2;
         if (this.operationMap[opt] !== undefined) {
           this.logger.warn(`duplicate operation : '${opt}' in '${filename}' OVERWRITED`);
@@ -539,11 +536,15 @@ export class OpenapiRouter {
   }
 }
 
-function proxyActionMw(ctx:IRouterContext, next:Next) {
+async function proxyActionMw(ctx: IRouterContext, next: Next) {
   const proxyAction = ctx[CTX_OPEANAPI_ROUTER]?.proxyAction;
+  let re: any;
   if (proxyAction) {
-    proxyAction(<any>ctx, next);
+    re = proxyAction(<any>ctx, next);
   } else {
-    next();
+    re = next();
+  }
+  if (re instanceof Promise) {
+    re = await re;
   }
 }

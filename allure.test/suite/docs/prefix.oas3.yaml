@@ -1,0 +1,11 @@
+openapi: 3.0.0
+info:
+  title: "API"
+  version: "1.0.0"
+x-path-prefix: /my/api
+paths:
+  /hello:
+    get:
+      responses: 
+        200:
+          description: ok

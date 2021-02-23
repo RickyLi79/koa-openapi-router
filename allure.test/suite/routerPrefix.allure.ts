@@ -13,7 +13,7 @@ import { OpenapiRouter } from '../../lib/OpenapiRouter';
 import { createOpenapiRouterConfig } from '../../lib/OpenapiRouterConfig';
 import { IOpenapiRouterConfig } from '../../lib/types';
 import { MutedLogger, TestStore } from '../TestStore';
-import { docsFile_create_oas3_json } from './docs/docsPath';
+import { docsFile_prefix_oas3_yaml } from './docs/docsPath';
 
 let defaultOpenapiRouterConfig: IOpenapiRouterConfig;
 
@@ -28,11 +28,11 @@ export class TestSuite {
     await TestStore.setup(this);
 
     runStep('mute OpenapiRouter.logger', () => { OpenapiRouter.logger = new MutedLogger(); });
+
     runStep('const defaultConfig', () => {
       defaultOpenapiRouterConfig = createOpenapiRouterConfig({
-        routerPrefix: '/myApi',
         controllerDir: path.join(__dirname, 'controller'),
-        docsDir: docsFile_create_oas3_json,
+        docsDir: docsFile_prefix_oas3_yaml,
         recursive: false,
         watcher: {
           enabled: false,
@@ -79,13 +79,13 @@ export class TestSuite {
     return TestSuite.allureAgentProxy!;
   }
 
-  @allureDecorators.severity(Severity.BLOCKER)
-  @test('by `new OpenapiRouter()` , one doc-file')
-  public async test1() {
+  @allureDecorators.severity(Severity.CRITICAL)
+  @test("config.routerPrefix==='/v1'")
+  public async test2() {
 
-    OpenapiRouter.logger = console;
+    // OpenapiRouter.logger = console;
 
-    const toPath = '/myApi/no/such/action/api1';
+    const toPath = '/v1/my/api/hello';
     runStep(`set : toPath = '${toPath}'`, () => {
       return toPath;
     });
@@ -98,11 +98,43 @@ export class TestSuite {
         .endAllureStep();
     }
 
-    await runStep('new OpenapiRouter()', async () => {
-      const openapiRouter = new OpenapiRouter(defaultOpenapiRouterConfig);
-      await openapiRouter.loadOpenapi();
-      TestSuite.app.use(openapiRouter.getRouter().routes());
-      attachmentJson('openapiRouter config', openapiRouter.config);
+    await runStep('OpenapiRouter.Start()', async () => {
+      const config = createOpenapiRouterConfig(defaultOpenapiRouterConfig, { routerPrefix: '/v1' });
+      await OpenapiRouter.Start(TestSuite.app, config);
+      attachmentJson('openapiRouter config', config);
+      attachmentUtf8FileAuto(config.docsDir);
+    });
+
+    {
+      const agent = this.createAllureAgentProxy();
+      await agent
+        .get(toPath)
+        .expect(501)
+        .endAllureStep();
+    }
+  }
+  @allureDecorators.severity(Severity.CRITICAL)
+  @test("config.routerPrefix===''")
+  public async test1() {
+
+    // OpenapiRouter.logger = console;
+
+    const toPath = '/my/api/hello';
+    runStep(`set : toPath = '${toPath}'`, () => {
+      return toPath;
+    });
+
+    {
+      const agent = this.createAllureAgentProxy();
+      await agent
+        .get(toPath)
+        .expect(404)
+        .endAllureStep();
+    }
+
+    await runStep('OpenapiRouter.Start()', async () => {
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
+      attachmentJson('openapiRouter config', defaultOpenapiRouterConfig);
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
 

@@ -25,7 +25,7 @@ describe('index.test', () => {
 
   it('init `OpenapiRouter`', async () => {
     const config = createOpenapiRouterConfig({
-      routerPrefix: '/my/api',
+      // routerPrefix: '/my/api',
       controllerDir: path.join(__dirname, 'controller'),
       docsDir: path.join(__dirname, 'oas-doc'),
     });
