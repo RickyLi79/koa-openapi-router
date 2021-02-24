@@ -33,6 +33,7 @@ export declare class OpenapiRouter {
     getRouter(): Router;
     static isEggApp: boolean;
     private static app;
+    static testMode: boolean;
     static Start(app: any, configs: IOptionalOpenapiRouterConfig | (IOptionalOpenapiRouterConfig[]), options?: IOpenapiRouterOptions): Promise<void>;
     private get logger();
     private static readonly _openapiRouters;
@@ -87,4 +88,5 @@ export declare class OpenapiRouter {
     private connectOneApi;
     private get action();
     private addRouter;
+    private markControllerStats;
 }

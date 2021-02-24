@@ -9,7 +9,7 @@ import * as watch from 'watch';
 import { FileOrFiles } from 'watch';
 import OpenapiRouterAction, { CTX_OPEANAPI_ROUTER, MARKER_OPERATION_MUTED } from './OpenapiRouterAction';
 import { defaultOpenapiRouterConfig } from './OpenapiRouterConfig';
-import { ILogger, IOpenapiRouterConfig, IOpenapiRouterOptions, IOptionalOpenapiRouterConfig, KoaControllerAction, OperationSchema } from './types';
+import { ControllerStatusEnum, ILogger, IOpenapiRouterConfig, IOpenapiRouterOptions, IOptionalOpenapiRouterConfig, KoaControllerAction, OperationSchema } from './types';
 
 export const OPENAPI_ROUTER_LOGGER = Symbol('OpenapiRouter#openapiRouterLogger');
 const OPENAPI_ROUTER_MIDDLEWARE = Symbol('OpenapiRouter#openapiRouterMiddlerware');
@@ -33,6 +33,7 @@ export class OpenapiRouter {
   private optInDoc: { [doc: string]: string[] } = {};// 单个api文档中包含的所有operation
 
   private operationMap: { [opt: string]: OperationSchema } = {};// 整个router中已注册的url所对应的schema
+
   /**
    * @private
    */
@@ -85,9 +86,11 @@ export class OpenapiRouter {
 
   public static isEggApp = false;
   private static app: any;
+  public static testMode = false;
   public static async Start(app: any, configs: IOptionalOpenapiRouterConfig | (IOptionalOpenapiRouterConfig[]), options?: IOpenapiRouterOptions) {
     if (options?.logger) this.logger = options?.logger;
     if (options?.proxyAction !== undefined) this.proxyAction = options.proxyAction;
+    this.testMode = !!options?.testMode;
     this.app = app;
     this.isEggApp = !!options?.isEggApp;
     if (!Array.isArray(configs)) { configs = [ configs ]; }
@@ -102,6 +105,11 @@ export class OpenapiRouter {
         }
       }
     }
+    /*
+    if (this.testMode) {
+      this.addTestModeRouter(app);
+    }
+     */
     await Promise.all(promiseArr);
   }
 
@@ -503,17 +511,17 @@ export class OpenapiRouter {
         const actionInfo = this.getKoaControllerAction(opt, { mute, method: iMethod, path: iPath2 }, true);
         this.addRouter(iMethod, iPath2, actionInfo);
         if (!actionInfo.mute) {
+
           if (actionInfo.proxyAction !== undefined) {
-            this.logger.info(`openapi-router connected success : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' by 'proxyAction'`);
+            this.markControllerStats(ControllerStatusEnum.PROXY, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>');
           } else if (actionInfo.action !== undefined) {
-            this.logger.info(`openapi-router connected success : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
+            this.markControllerStats(ControllerStatusEnum.CONNECTED, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>');
           } else {
-            this.logger.error(`openapi-router connect failed : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
+            this.markControllerStats(ControllerStatusEnum.NotImpelement, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>');
           }
         } else {
-          this.logger.info(`openapi-router connect muted : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}', app.env==='${appEnv}', x-mute-env==='${JSON.stringify(iOperation['x-mute-env'])}' `);
+          this.markControllerStats(ControllerStatusEnum.MUTED, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>', `app.env==='${appEnv}', x-mute-env==='${JSON.stringify(iOperation['x-mute-env'])}`);
         }
-        // const fullOpt = `${iMethod.toUpperCase()} ${this.routerPrefix}${iPath2}`;
       }
     }
 
@@ -549,7 +557,21 @@ export class OpenapiRouter {
       );
     }
   }
+
+  private markControllerStats(status:ControllerStatusEnum, method:string, path:string, dest:string, extraMsg?:string) {
+    const message = `[${status}] : method='${method.toUpperCase()}' path='${path}' by '${dest}' ${extraMsg ? '| ' + extraMsg : ''}`;
+    switch (status) {
+      case ControllerStatusEnum.NotImpelement:
+        this.logger.error(message);
+        break;
+
+      default:
+        this.logger.info(message);
+        break;
+    }
+  }
 }
+
 
 async function proxyActionMw(ctx: IRouterContext, next: Next) {
   const proxyAction = ctx[CTX_OPEANAPI_ROUTER]?.proxyAction;

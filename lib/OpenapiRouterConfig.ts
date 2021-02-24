@@ -21,10 +21,6 @@ export const defaultOpenapiRouterConfig: IOpenapiRouterConfig = {
     request: true,
     reponse: false,
   },
-  test: {
-    enabled: false,
-    controllerFileExt: '.js',
-  },
 };
 
 

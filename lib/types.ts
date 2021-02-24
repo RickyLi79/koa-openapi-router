@@ -12,7 +12,9 @@ export type IOpenapiRouterOptions = {
   logger?: ILogger,
   isEggApp?: boolean,
   useAllowedMethods?: boolean,
-  proxyAction?: KoaControllerAction
+  proxyAction?: KoaControllerAction,
+
+  testMode?: boolean;
 };
 
 export type IOptionalOpenapiRouterConfig = PowerPartial<IOpenapiRouterConfig>;
@@ -88,13 +90,6 @@ export type IOpenapiRouterConfig = {
    */
   proxyAction?: KoaControllerAction,
 
-  /**
-   * @private
-   */
-  test: {
-    enabled: boolean;
-    controllerFileExt: '.ts' | '.js'
-  };
 };
 
 export const OPERATION_SCHEMA = 'operation-schema';
@@ -191,4 +186,12 @@ export interface OperationSchema {
   }
 
   [key: string]: any;
+}
+
+
+export enum ControllerStatusEnum{
+  PROXY = 'proxyAction',
+  CONNECTED = 'connected',
+  NotImpelement = 'notImpelement',
+  MUTED = 'muted'
 }

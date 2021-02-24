@@ -43,10 +43,6 @@ export class TestSuite {
           request: true,
           reponse: true,
         },
-        test: {
-          enabled: true,
-          controllerFileExt: '.ts',
-        },
       });
       attachmentJson('defaultConfig', defaultOpenapiRouterConfig);
     });
@@ -103,7 +99,7 @@ export class TestSuite {
 
     await runStep('OpenapiRouter.Start()', async () => {
       const config = createOpenapiRouterConfig(defaultOpenapiRouterConfig, { routerPrefix: '/v1' });
-      await OpenapiRouter.Start(TestSuite.app, config);
+      await OpenapiRouter.Start(TestSuite.app, config, { testMode: true });
       attachmentJson('openapiRouter config', config);
       attachmentUtf8FileAuto(config.docsDir);
     });
@@ -136,7 +132,7 @@ export class TestSuite {
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
-      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig, { testMode: true });
       attachmentJson('openapiRouter config', defaultOpenapiRouterConfig);
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });

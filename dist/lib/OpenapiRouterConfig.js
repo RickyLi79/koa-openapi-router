@@ -19,10 +19,6 @@ exports.defaultOpenapiRouterConfig = {
         request: true,
         reponse: false,
     },
-    test: {
-        enabled: false,
-        controllerFileExt: '.js',
-    },
 };
 /**
  * create a OpenapiRouterConfig , extend the default value

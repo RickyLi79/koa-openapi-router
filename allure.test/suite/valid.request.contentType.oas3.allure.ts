@@ -42,10 +42,6 @@ export class TestSuite {
           request: true,
           reponse: true,
         },
-        test: {
-          enabled: true,
-          controllerFileExt: '.ts',
-        },
       });
       attachmentJson('defaultConfig', defaultOpenapiRouterConfig);
     });
@@ -100,7 +96,7 @@ export class TestSuite {
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
-      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig, { testMode: true });
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
 
@@ -153,7 +149,7 @@ export class TestSuite {
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
-      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig, { testMode: true });
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
 
@@ -206,7 +202,7 @@ export class TestSuite {
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
-      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig, { testMode: true });
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
 

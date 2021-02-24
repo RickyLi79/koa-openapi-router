@@ -23,11 +23,11 @@ function OpenapiRouterAction(openapiRouter) {
         const opt = `${ctx.method.toUpperCase()} ${ctx.routerPath}`;
         const config = openapiRouter.config;
         const operation = openapiRouter.getOperationByOpt(opt);
-        if (config.test.enabled) {
+        if (OpenapiRouter_1.OpenapiRouter.testMode) {
             ctx.set(Test_Response_Header_1.TEST_RESPONSE_HEADER_TEST_ENABLED, true);
         }
         if (operation[exports.MARKER_OPERATION_MUTED]) {
-            if (config.test.enabled) {
+            if (OpenapiRouter_1.OpenapiRouter.testMode) {
                 ctx.set(Test_Response_Header_1.TEST_RESPONSE_HEADER_ACTION_MUTED, true);
             }
             ctx.status = 404;
@@ -38,8 +38,8 @@ function OpenapiRouterAction(openapiRouter) {
             return;
         }
         const actionInfo = openapiRouter.getKoaControllerAction(opt);
-        if (config.test.enabled) {
-            const controllerFile = openapiRouter.getKoaControllerActionFile(opt) + config.test.controllerFileExt;
+        if (OpenapiRouter_1.OpenapiRouter.testMode) {
+            const controllerFile = openapiRouter.getKoaControllerActionFile(opt) + '.ts';
             ctx.set(Test_Response_Header_1.TEST_RESPONSE_HEADER_CONTROLLER_FILE, controllerFile);
             ctx.set(Test_Response_Header_1.TEST_RESPONSE_HEADER_REQUEST_SCHEMA, JSON.stringify(operation));
         }
@@ -229,7 +229,7 @@ function OpenapiRouterAction(openapiRouter) {
                     let iHaderValue = ctx.response.get(iHeaderName);
                     if (resHeaders[iHeaderName].required === true && !iHaderValue) {
                         OpenapiRouter_1.OpenapiRouter.logger.error(new SyntaxError(`'${iHeaderName}' in 'response.header' required`));
-                        if (config.test.enabled) {
+                        if (OpenapiRouter_1.OpenapiRouter.testMode) {
                             ctx.response.set(Test_Response_Header_1.TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS, '415');
                         }
                         toBreak = true;
@@ -250,7 +250,7 @@ function OpenapiRouterAction(openapiRouter) {
                         }
                         catch (err) {
                             OpenapiRouter_1.OpenapiRouter.logger.error(err.errors[0]);
-                            if (config.test.enabled) {
+                            if (OpenapiRouter_1.OpenapiRouter.testMode) {
                                 ctx.response.set(Test_Response_Header_1.TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS, '422');
                             }
                             toBreak = true;
@@ -292,7 +292,7 @@ function OpenapiRouterAction(openapiRouter) {
                                 }
                             }
                         }
-                        if (!contentType && ctxContentType && config.test.enabled) {
+                        if (!contentType && ctxContentType && OpenapiRouter_1.OpenapiRouter.testMode) {
                             ctx.response.set(Test_Response_Header_1.TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '415');
                             break;
                         }
@@ -303,7 +303,7 @@ function OpenapiRouterAction(openapiRouter) {
                             }
                             catch (err) {
                                 OpenapiRouter_1.OpenapiRouter.logger.error(err.errors[0]);
-                                if (config.test.enabled) {
+                                if (OpenapiRouter_1.OpenapiRouter.testMode) {
                                     ctx.response.set(Test_Response_Header_1.TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '422');
                                     break;
                                 }
@@ -315,7 +315,7 @@ function OpenapiRouterAction(openapiRouter) {
                     }
                 }
                 else {
-                    if (config.test.enabled) {
+                    if (OpenapiRouter_1.OpenapiRouter.testMode) {
                         ctx.response.set(Test_Response_Header_1.TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '415');
                         break;
                     }
@@ -323,7 +323,7 @@ function OpenapiRouterAction(openapiRouter) {
                 ctx.response.set(Test_Response_Header_1.TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '200');
                 // eslint-disable-next-line no-constant-condition
             } while (false);
-            if (config.test.enabled) {
+            if (OpenapiRouter_1.OpenapiRouter.testMode) {
                 if (!ctx.response.get(Test_Response_Header_1.TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS)) {
                     ctx.response.set(Test_Response_Header_1.TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS, '200');
                 }

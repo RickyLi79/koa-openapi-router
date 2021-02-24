@@ -11,6 +11,7 @@ const path = tslib_1.__importStar(require("path"));
 const watch = tslib_1.__importStar(require("watch"));
 const OpenapiRouterAction_1 = tslib_1.__importStar(require("./OpenapiRouterAction"));
 const OpenapiRouterConfig_1 = require("./OpenapiRouterConfig");
+const types_1 = require("./types");
 exports.OPENAPI_ROUTER_LOGGER = Symbol('OpenapiRouter#openapiRouterLogger');
 const OPENAPI_ROUTER_MIDDLEWARE = Symbol('OpenapiRouter#openapiRouterMiddlerware');
 exports.X_OAS_VER = 'x-oas-ver';
@@ -74,6 +75,7 @@ class OpenapiRouter {
             this.logger = options === null || options === void 0 ? void 0 : options.logger;
         if ((options === null || options === void 0 ? void 0 : options.proxyAction) !== undefined)
             this.proxyAction = options.proxyAction;
+        this.testMode = !!(options === null || options === void 0 ? void 0 : options.testMode);
         this.app = app;
         this.isEggApp = !!(options === null || options === void 0 ? void 0 : options.isEggApp);
         if (!Array.isArray(configs)) {
@@ -90,6 +92,11 @@ class OpenapiRouter {
                 }
             }
         }
+        /*
+        if (this.testMode) {
+          this.addTestModeRouter(app);
+        }
+         */
         await Promise.all(promiseArr);
     }
     // #endregion
@@ -451,19 +458,18 @@ class OpenapiRouter {
                 this.addRouter(iMethod, iPath2, actionInfo);
                 if (!actionInfo.mute) {
                     if (actionInfo.proxyAction !== undefined) {
-                        this.logger.info(`openapi-router connected success : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' by 'proxyAction'`);
+                        this.markControllerStats(types_1.ControllerStatusEnum.PROXY, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>');
                     }
                     else if (actionInfo.action !== undefined) {
-                        this.logger.info(`openapi-router connected success : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
+                        this.markControllerStats(types_1.ControllerStatusEnum.CONNECTED, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>');
                     }
                     else {
-                        this.logger.error(`openapi-router connect failed : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
+                        this.markControllerStats(types_1.ControllerStatusEnum.NotImpelement, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>');
                     }
                 }
                 else {
-                    this.logger.info(`openapi-router connect muted : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}', app.env==='${appEnv}', x-mute-env==='${JSON.stringify(iOperation['x-mute-env'])}' `);
+                    this.markControllerStats(types_1.ControllerStatusEnum.MUTED, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>', `app.env==='${appEnv}', x-mute-env==='${JSON.stringify(iOperation['x-mute-env'])}`);
                 }
-                // const fullOpt = `${iMethod.toUpperCase()} ${this.routerPrefix}${iPath2}`;
             }
         }
         return true;
@@ -488,9 +494,21 @@ class OpenapiRouter {
             this._router[method.toLowerCase()](path, this.action);
         }
     }
+    markControllerStats(status, method, path, dest, extraMsg) {
+        const message = `[${status}] : method='${method.toUpperCase()}' path='${path}' by '${dest}' ${extraMsg ? '| ' + extraMsg : ''}`;
+        switch (status) {
+            case types_1.ControllerStatusEnum.NotImpelement:
+                this.logger.error(message);
+                break;
+            default:
+                this.logger.info(message);
+                break;
+        }
+    }
 }
 exports.OpenapiRouter = OpenapiRouter;
 OpenapiRouter.isEggApp = false;
+OpenapiRouter.testMode = false;
 // #region global file watcher
 OpenapiRouter._openapiRouters = [];
 /**

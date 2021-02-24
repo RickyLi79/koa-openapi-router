@@ -25,12 +25,12 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
     const config = openapiRouter.config;
     const operation: OperationSchema = openapiRouter.getOperationByOpt(opt);
 
-    if (config.test.enabled) {
+    if (OpenapiRouter.testMode) {
       ctx.set(TEST_RESPONSE_HEADER_TEST_ENABLED, true);
     }
 
     if (operation[MARKER_OPERATION_MUTED]) {
-      if (config.test.enabled) {
+      if (OpenapiRouter.testMode) {
         ctx.set(TEST_RESPONSE_HEADER_ACTION_MUTED, true);
       }
       ctx.status = 404;
@@ -43,8 +43,9 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
     }
 
     const actionInfo = openapiRouter.getKoaControllerAction(opt);
-    if (config.test.enabled) {
-      const controllerFile = openapiRouter.getKoaControllerActionFile(opt) + config.test.controllerFileExt;
+    if (OpenapiRouter.testMode) {
+      const controllerFile = openapiRouter.getKoaControllerActionFile(opt) + '.ts';
+
       ctx.set(TEST_RESPONSE_HEADER_CONTROLLER_FILE, controllerFile);
 
       ctx.set(TEST_RESPONSE_HEADER_REQUEST_SCHEMA, JSON.stringify(operation));
@@ -238,7 +239,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
           let iHaderValue: any = ctx.response.get(iHeaderName);
           if (resHeaders[iHeaderName].required === true && !iHaderValue) {
             OpenapiRouter.logger.error(new SyntaxError(`'${iHeaderName}' in 'response.header' required`));
-            if (config.test.enabled) {
+            if (OpenapiRouter.testMode) {
               ctx.response.set(TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS, '415');
             }
             toBreak = true;
@@ -256,7 +257,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
               jsonschema.validate(iHaderValue, schema, { throwFirst: true, throwError: true, preValidateProperty });
             } catch (err) {
               OpenapiRouter.logger.error(err.errors[0]);
-              if (config.test.enabled) {
+              if (OpenapiRouter.testMode) {
                 ctx.response.set(TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS, '422');
               }
               toBreak = true;
@@ -299,7 +300,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
               }
             }
 
-            if (!contentType && ctxContentType && config.test.enabled) {
+            if (!contentType && ctxContentType && OpenapiRouter.testMode) {
               ctx.response.set(TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '415');
               break;
             }
@@ -310,7 +311,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
                 jsonschema.validate(ctx.body, resContentSchema, { throwError: true, throwFirst: true, preValidateProperty });
               } catch (err) {
                 OpenapiRouter.logger.error(err.errors[0]);
-                if (config.test.enabled) {
+                if (OpenapiRouter.testMode) {
                   ctx.response.set(TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '422');
                   break;
                 }
@@ -320,17 +321,17 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
             OpenapiRouter.logger.error(err);
           }
         } else {
-          if (config.test.enabled) {
+          if (OpenapiRouter.testMode) {
             ctx.response.set(TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '415');
             break;
           }
         }
 
         ctx.response.set(TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '200');
-      // eslint-disable-next-line no-constant-condition
+        // eslint-disable-next-line no-constant-condition
       } while (false);
 
-      if (config.test.enabled) {
+      if (OpenapiRouter.testMode) {
         if (!ctx.response.get(TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS)) {
           ctx.response.set(TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS, '200');
         }

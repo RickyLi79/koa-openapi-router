@@ -41,10 +41,6 @@ export class TestSuite {
           request: true,
           reponse: true,
         },
-        test: {
-          enabled: true,
-          controllerFileExt: '.ts',
-        },
       });
       attachmentJson('defaultConfig', defaultOpenapiRouterConfig);
     });
@@ -167,7 +163,7 @@ export class TestSuite {
 
     await runStep('OpenapiRouter.Start()', async () => {
       const routerConfig = extend(true, {}, defaultOpenapiRouterConfig, { routerPrefix: '/api' });
-      await OpenapiRouter.Start(TestSuite.app, routerConfig);
+      await OpenapiRouter.Start(TestSuite.app, routerConfig, { testMode: true });
       attachmentJsonByObj({ routerConfig });
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
@@ -228,7 +224,7 @@ export class TestSuite {
       const config1 = extend(true, {}, defaultOpenapiRouterConfig, { routerPrefix: '/api1', docsDir: docsFile_create_oas3_json });
       const config2 = extend(true, {}, defaultOpenapiRouterConfig, { routerPrefix: '/api2', docsDir: docsFile_valid_req_para_oas3_json });
       const config3 = extend(true, {}, defaultOpenapiRouterConfig, { routerPrefix: '/api3', docsDir: docsFile_valid_req_body_oas3_yaml });
-      await OpenapiRouter.Start(TestSuite.app, [ config1, config2, config3 ]);
+      await OpenapiRouter.Start(TestSuite.app, [ config1, config2, config3 ], { testMode: true });
       attachmentJsonByObj([ config1, config2, config3 ]);
       attachmentUtf8FileAuto(config1.docsDir);
       attachmentUtf8FileAuto(config2.docsDir);

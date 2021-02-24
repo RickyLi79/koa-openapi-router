@@ -41,10 +41,6 @@ export class TestSuite {
           request: true,
           reponse: true,
         },
-        test: {
-          enabled: true,
-          controllerFileExt: '.ts',
-        },
       });
       AllureHelper.attachmentJson('defaultConfig', defaultOpenapiRouterConfig);
     });
@@ -100,7 +96,7 @@ export class TestSuite {
     }
 
     await AllureHelper.runStep('OpenapiRouter.Start()', async () => {
-      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig, { testMode: true });
       AllureHelper.attachmentJson('openapiRouter config', defaultOpenapiRouterConfig);
       AllureHelper.attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });

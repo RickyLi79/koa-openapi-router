@@ -10,6 +10,7 @@ export declare type IOpenapiRouterOptions = {
     isEggApp?: boolean;
     useAllowedMethods?: boolean;
     proxyAction?: KoaControllerAction;
+    testMode?: boolean;
 };
 export declare type IOptionalOpenapiRouterConfig = PowerPartial<IOpenapiRouterConfig>;
 export declare type IOpenapiRouterConfig = {
@@ -70,13 +71,6 @@ export declare type IOpenapiRouterConfig = {
      * if set, all operation will lead to this handler
      */
     proxyAction?: KoaControllerAction;
-    /**
-     * @private
-     */
-    test: {
-        enabled: boolean;
-        controllerFileExt: '.ts' | '.js';
-    };
 };
 export declare const OPERATION_SCHEMA = "operation-schema";
 export declare type PowerPartial<T> = {
@@ -162,4 +156,10 @@ export interface OperationSchema {
         };
     };
     [key: string]: any;
+}
+export declare enum ControllerStatusEnum {
+    PROXY = "proxyAction",
+    CONNECTED = "connected",
+    NotImpelement = "notImpelement",
+    MUTED = "muted"
 }
