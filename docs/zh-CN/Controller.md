@@ -15,8 +15,8 @@
 `OpenapiRouter` 会尝试通过约定规则定位Controller，并调用符合命名规则的method
 
 ### controller命名规则
-`OpenapiRouter` 会通过每个`path`中的`x-controller`/`tags[0]`定位控制器文件。
-如果没有`x-controller`也没有`tags[0]`, 则会寻找`default.js`。
+`OpenapiRouter` 会通过每个`path`中的`x-controller`定位控制器文件。
+如果没有`x-controller`若无给出，则会取值`default`。
 
 #### 例子 : controller file 控制器文件命名规则 
 ```yaml
@@ -25,16 +25,15 @@
     /the/path/1:
       get:
         x-controller: my/ctl-1
-        description: no `x-controller`, no `tags[0]`
+        description: no `x-controller`
     /the/path/2:
       get:
-        description: no `x-controller`, with `tags[0]`
-        tags:
-          - my/ctl-2
+        description: no `x-controller`, with `x-controller`
+        x-controller: my/ctl-2
         ....
     /the/path/3:
       get:
-        description: no `x-controller`, no `tags[0]`
+        description: no `x-controller`, no `x-controller`
         ...
 ```
 ```
@@ -56,8 +55,7 @@ app-root
   paths:
     /my/path:
       get:
-        tags:
-          - my/tag
+        x-controller: my/tag
         ....
 ```
 - `javascript`
@@ -103,8 +101,7 @@ OpenApi-doc 示例 :
   paths:
     /pets/{petId}:
     get:
-      tags:
-        - pets
+      x-controller: pets
 ```
 `OpenapiRouter` 将会寻找method: `'GET /pets/:petId'`。
 
@@ -128,10 +125,10 @@ export default class {
 ### 通过logger确认是否命名正确、
 如果无法确定controller和method是否命名正确，可通过logger给出的信息进行调整。
 - 命名正确的logger信息 :
-  ```
-  openapi-router connected success : method='POST' path='/my/api/hello' from >   default.js#'POST /hello'
+  ```js
+  [connected] : method='POST' path='POST /myapi/register' from > 'user.js' # 'POST /register'
   ```
 - 命名错误导致失败的logger信息 :
-  ```  
-  openapi-router connect failed : method='GET' path='/my/api/nihao' from >   default.js#'GET /nihao'
+  ```js
+  [notImpelement] : method='POST' path='POST /myapi/login' from > 'default.js' # 'POST /login'
   ```

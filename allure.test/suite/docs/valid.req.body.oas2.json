@@ -7,7 +7,7 @@
   "paths": {
     "/valid/request/body": {
       "post": {
-        "tags": [
+        "x-controller": [
           "valid.request"
         ],
         "consumes":["application/json"],
@@ -40,7 +40,7 @@
         }
       },
       "patch": {
-        "tags": [
+        "x-controller": [
           "valid.request"
         ],
         "consumes":["application/json"],

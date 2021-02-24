@@ -12,14 +12,14 @@ paths:
   /valid/request/contentType:
     get:
       description: no `content-type`
-      tags:
+      x-controller:
         - valid.request
       responses:
         default:
           description: default
     post:
       description: "'content-type' optional"
-      tags:
+      x-controller:
         - valid.request
       requestBody:
         required: false
@@ -34,7 +34,7 @@ paths:
           
     patch:
       description: "'content-type' required"
-      tags:
+      x-controller:
         - valid.request
       requestBody:
         required: true

@@ -6,7 +6,7 @@ paths:
   /valid/response/header:
     get:
       description: no `response.header` required
-      tags:
+      x-controller:
         - valid.response.header
       responses: 
         200:
@@ -15,7 +15,7 @@ paths:
           description: default
     post:
       description: "`response.header` optional, valid"
-      tags:
+      x-controller:
         - valid.response.header
       responses:
         200:
@@ -30,7 +30,7 @@ paths:
           description: default
     patch:
       description: "`response.header` optional, invalid"
-      tags:
+      x-controller:
         - valid.response.header
       responses:
         200:
@@ -46,7 +46,7 @@ paths:
           description: default
     delete:
       description: "`response.header` required, valid"
-      tags:
+      x-controller:
         - valid.response.header
       responses:
         200:
@@ -62,7 +62,7 @@ paths:
           description: default
     put:
       description: "`response.header` required, invalid"
-      tags:
+      x-controller:
         - valid.response.header
       responses:
         200:

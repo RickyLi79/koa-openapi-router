@@ -6,14 +6,14 @@ paths:
   /valid/response/body:
     get:
       description: no `response.body` schema
-      tags:
+      x-controller:
         - valid.response.body
       responses:
         default:
           description: default
     post:
       description: "`response.body` , valid"
-      tags:
+      x-controller:
         - valid.response.body
       responses:
         200:
@@ -28,7 +28,7 @@ paths:
                       - 1
     patch:
       description: "`response.body` , invalid"
-      tags:
+      x-controller:
         - valid.response.body
       responses:
         200:

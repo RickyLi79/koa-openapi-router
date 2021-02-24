@@ -1,4 +1,5 @@
 import * as jsonschema from 'jsonschema';
+import path from 'path';
 import { toQueries } from './extend';
 import { OpenapiRouter, X_OAS_VER } from './OpenapiRouter';
 import { TEST_RESPONSE_HEADER_ACTION_MUTED, TEST_RESPONSE_HEADER_CONTROLLER_FILE, TEST_RESPONSE_HEADER_REQUEST_SCHEMA, TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS, TEST_RESPONSE_HEADER_TEST_ENABLED } from './Test-Response-Header';
@@ -44,7 +45,8 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
 
     const actionInfo = openapiRouter.getKoaControllerAction(opt);
     if (OpenapiRouter.testMode) {
-      const controllerFile = openapiRouter.getKoaControllerActionFile(opt) + '.ts';
+      const controllerFile = path.join(config.controllerDir, actionInfo.ctlPath ?? '??');
+      // const controllerFile = openapiRouter.getKoaControllerActionFile(opt);
 
       ctx.set(TEST_RESPONSE_HEADER_CONTROLLER_FILE, controllerFile);
 

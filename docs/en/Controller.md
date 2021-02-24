@@ -15,7 +15,7 @@ English | [[简体中文]](../../README.zh-CN.md)
 `OpenapiRouter` will try to locate Controller and calls the method.
 
 ### controller file 
-`OpenapiRouter` will try to locate file by schema `tags[0]`. if `tags[0]` not given, will locate `default.js`
+`OpenapiRouter` will try to locate file by schema `x-controller`. default value is `default` if not given.
 
 #### example : controller file 
 ```yaml
@@ -24,16 +24,15 @@ English | [[简体中文]](../../README.zh-CN.md)
     /the/path/1:
       get:
         x-controller: my/ctl-1
-        description: no `x-controller`, no `tags[0]`
+        description: no `x-controller`
     /the/path/2:
       get:
-        description: no `x-controller`, with `tags[0]`
-        tags:
-          - my/ctl-2
+        description: no `x-controller`, with `x-controller`
+        x-controller: my/ctl-2
         ....
     /the/path/3:
       get:
-        description: no `x-controller`, no `tags[0]`
+        description: no `x-controller`, no `x-controller`
         ...
 ```
 ```
@@ -55,8 +54,7 @@ app-root
   paths:
     /my/path:
       get:
-        tags:
-          - my/tag
+        x-controller: my/tag
         ....
 ```
 - `javascript`
@@ -102,8 +100,7 @@ OpenApi-doc expample :
   paths:
     /pets/{petId}:
     get:
-      tags:
-        - pets
+      x-controller: pets
 ```
 `OpenapiRouter` will calls `'GET /pets/:petId'`.
 
@@ -127,10 +124,10 @@ export default class {
 ### check the logger
 if not sure controller file and method name. logger will tells the correct way.
 - success logger example :
-  ```
-  openapi-router connected success : method='POST' path='/my/api/hello' from >   default.js#'POST /hello'
+  ```js
+  [connected] : method='POST' path='POST /myapi/register' from > 'user.js' # 'POST /register'
   ```
 - failed logger example :
-  ```  
-  openapi-router connect failed : method='GET' path='/my/api/nihao' from >   default.js#'GET /nihao'
+  ```js
+  [notImpelement] : method='POST' path='POST /myapi/login' from > 'default.js' # 'POST /login'
   ```

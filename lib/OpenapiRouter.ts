@@ -15,8 +15,10 @@ export const OPENAPI_ROUTER_LOGGER = Symbol('OpenapiRouter#openapiRouterLogger')
 const OPENAPI_ROUTER_MIDDLEWARE = Symbol('OpenapiRouter#openapiRouterMiddlerware');
 export const X_OAS_VER = 'x-oas-ver';
 const X_CONTROLLER = 'x-controller';
+const X_CONTROLLER_FOLDER = 'x-controller-folder';
+const X_PREFIX = 'x-path-prefix';
 
-export type KoaControllerActionInfo = { mute: boolean, file: string, func: string, action?: KoaControllerAction, ctl?: any, proxyAction?: (ctx: IRouterContext, next?: Next) => Promise<any> };
+export type KoaControllerActionInfo = { mute: boolean, file: string, func: string, action?: KoaControllerAction, ctlPath?: string, ctl?: any, proxyAction?: (ctx: IRouterContext, next?: Next) => Promise<any> };
 
 const OPENAPI_FILE_EXTS = { '.json': true, '.yaml': true, '.yml': true };
 function isDocsExt(file: string) {
@@ -215,7 +217,7 @@ export class OpenapiRouter {
   /**
    * @private
    */
-  public getKoaControllerAction(opt: string, qry?: { mute: boolean, method: string, path: string }, force = false): KoaControllerActionInfo {
+  public getKoaControllerAction(opt: string, qry?: { ctlPath: string, prefix: string, mute: boolean, method: string, path: string }, force = false): KoaControllerActionInfo {
     if (this.proxyAction) {
       return {
         file: '---',
@@ -223,16 +225,17 @@ export class OpenapiRouter {
         // action: this.proxyAction,
         proxyAction: this.proxyAction,
         mute: qry?.mute ?? false,
+        ctlPath: qry?.ctlPath,
       };
     }
     let actionInfo: KoaControllerActionInfo = this.koaControllerActionMap[opt];
     if (!force && (actionInfo !== undefined || qry === undefined)) {
       return actionInfo;
     }
-    const operation: any = this.getOperationByOpt(opt);
-    const tag: string = operation[X_CONTROLLER] ?? operation.tags?.[0] ?? 'default';
+    // const operation: any = this.getOperationByOpt(opt);
     qry = qry!;
-    actionInfo = { mute: qry.mute, file: tag + '.js', func: qry.method.toUpperCase() + ' ' + qry.path };
+    const ctlPath: string = qry.ctlPath;
+    actionInfo = { ctlPath: qry.ctlPath, mute: qry.mute, file: ctlPath + '.js', func: qry.method.toUpperCase() + ' ' + qry.path };
 
     let ctl: any;
     if (OpenapiRouter.isEggApp) {
@@ -243,7 +246,7 @@ export class OpenapiRouter {
         ctl = ctl?.[iDir];
         if (!ctl) { break; }
       }
-      const controllerPath = tag.split('/');
+      const controllerPath = ctlPath.split('/');
 
       for (const iPath of controllerPath) {
         if (iPath === '') continue;
@@ -253,7 +256,7 @@ export class OpenapiRouter {
     } else {
 
       try {
-        const ctlCls = require(path.join(this.config.controllerDir, tag));
+        const ctlCls = require(path.join(this.config.controllerDir, ctlPath));
         if (ctlCls.__esModule) {
           if (typeof ctlCls.default === 'function') {
             ctl = new ctlCls.default();
@@ -294,6 +297,9 @@ export class OpenapiRouter {
       }
       this.koaControllerActionMap[opt] = actionInfo;
     }
+    if (actionInfo.file.startsWith('/')) {
+      actionInfo.file = actionInfo.file.substr(1);
+    }
     return actionInfo;
   }
 
@@ -302,7 +308,7 @@ export class OpenapiRouter {
    */
   public getKoaControllerActionFile(opt: string) {
     const operation: any = this.getOperationByOpt(opt);
-    const tag = operation.tags?.[0] ?? 'default';
+    const tag = operation[X_CONTROLLER] ?? 'default';
     return path.join(this.config.controllerDir, tag);
   }
 
@@ -482,25 +488,28 @@ export class OpenapiRouter {
         }
       }
     }
-    const prefix = api['x-path-prefix'] ?? '';
+    const prefix = api[X_PREFIX] ?? '';
+    const ctlPath = getControllerStr(api[X_CONTROLLER_FOLDER], true);
     const appEnv = OpenapiRouter.app.config?.env ?? OpenapiRouter.app.env;
     let docMuteArr = (api['x-mute-env'] as string | string[]) ?? [];
     if (!Array.isArray(docMuteArr)) docMuteArr = [ docMuteArr ];
     for (const iPath in api.paths) {
       const iPathItem = api.paths[iPath];
       for (const iMethod in iPathItem) {
-        const iPath2 = prefix + iPath.replace(/{/g, ':').replace(/}/g, ''); // /api/{user}/{id} => /api/:user/:id
-        const opt = iMethod.toUpperCase() + ' ' + this.config.routerPrefix + iPath2;
+        const iOperation = iPathItem[iMethod];
+        const iPrefix = prefix + (iOperation[X_PREFIX] ?? '');
+        const iCtlPath = ctlPath + getControllerStr(iOperation[X_CONTROLLER], false);
+        const iPath2 = iPath.replace(/{/g, ':').replace(/}/g, ''); // /api/{user}/{id} => /api/:user/:id
+        const opt = iMethod.toUpperCase() + ' ' + this.config.routerPrefix + iPrefix + iPath2;
         if (this.operationMap[opt] !== undefined) {
           this.logger.warn(`duplicate operation : '${opt}' in '${filename}' OVERWRITED`);
           // continue;
         }
         this.optInDoc[filename] = this.optInDoc[filename] ?? [];
         this.optInDoc[filename].push(opt);
-
-        const iOperation = iPathItem[iMethod];
-        iOperation[X_OAS_VER] = specVersion;
         this.operationMap[opt] = iOperation;
+
+        iOperation[X_OAS_VER] = specVersion;
         let mute = docMuteArr.includes(appEnv);
         if (!mute) {
           let optMuteArr = (iOperation['x-mute-env'] as string | string[]) ?? [];
@@ -508,19 +517,19 @@ export class OpenapiRouter {
           mute = optMuteArr.includes(appEnv);
         }
         iOperation[MARKER_OPERATION_MUTED] = mute;
-        const actionInfo = this.getKoaControllerAction(opt, { mute, method: iMethod, path: iPath2 }, true);
-        this.addRouter(iMethod, iPath2, actionInfo);
+        const actionInfo = this.getKoaControllerAction(opt, { mute, ctlPath: iCtlPath, prefix: iPrefix, method: iMethod, path: iPath2 }, true);
+        this.addRouter(iMethod, iPrefix + iPath2, actionInfo);
         if (!actionInfo.mute) {
 
           if (actionInfo.proxyAction !== undefined) {
-            this.markControllerStats(ControllerStatusEnum.PROXY, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>');
+            this.markControllerStats(ControllerStatusEnum.PROXY, iMethod, `${opt}`, '<proxyAction>)');
           } else if (actionInfo.action !== undefined) {
-            this.markControllerStats(ControllerStatusEnum.CONNECTED, iMethod, `${this.config.routerPrefix}${iPath2}`, `${actionInfo.file}#'${actionInfo.func}'`);
+            this.markControllerStats(ControllerStatusEnum.CONNECTED, iMethod, `${opt}`, `'${actionInfo.file}' # '${actionInfo.func}'`);
           } else {
-            this.markControllerStats(ControllerStatusEnum.NotImpelement, iMethod, `${this.config.routerPrefix}${iPath2}`, `${actionInfo.file}#'${actionInfo.func}'`);
+            this.markControllerStats(ControllerStatusEnum.NotImpelement, iMethod, `${opt}`, `'${actionInfo.file}' # '${actionInfo.func}'`);
           }
         } else {
-          this.markControllerStats(ControllerStatusEnum.MUTED, iMethod, `${this.config.routerPrefix}${iPath2}`, '<null>', `app.env==='${appEnv}', x-mute-env==='${JSON.stringify(iOperation['x-mute-env'])}`);
+          this.markControllerStats(ControllerStatusEnum.MUTED, iMethod, `${opt}`, '<null>', `app.env==='${appEnv}', x-mute-env==='${JSON.stringify(iOperation['x-mute-env'])}`);
         }
       }
     }
@@ -559,7 +568,7 @@ export class OpenapiRouter {
   }
 
   private markControllerStats(status: ControllerStatusEnum, method: string, path: string, dest: string, extraMsg?: string) {
-    const message = `[${status}] : method='${method.toUpperCase()}' path='${path}' from > '${dest}' ${extraMsg ? '| ' + extraMsg : ''}`;
+    const message = `[${status}] : method='${method.toUpperCase()}' path='${path}' from > ${dest} ${extraMsg ? '| ' + extraMsg : ''}`;
     switch (status) {
       case ControllerStatusEnum.NotImpelement:
         this.logger.error(message);
@@ -584,4 +593,28 @@ async function proxyActionMw(ctx: IRouterContext, next: Next) {
   if (re instanceof Promise) {
     re = await re;
   }
+}
+
+
+function getControllerStr(str: string | string[], isFolder: boolean) {
+  str = str ?? '';
+
+  if (Array.isArray(str)) {
+    str = str[0];
+  }
+  if (typeof str !== 'string') {
+    throw new Error(`'${X_CONTROLLER_FOLDER}' or '${X_CONTROLLER}' MUST be \`string\``);
+  }
+
+  if (!str.startsWith('/')) {
+    str = '/' + str;
+  }
+  if (str.endsWith('/')) {
+    str = str.substr(0, str.length - 1);
+  }
+  if (str === '' && !isFolder) {
+    str = '/default';
+  }
+
+  return str;
 }

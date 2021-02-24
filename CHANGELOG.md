@@ -1,5 +1,10 @@
 ## CHANGE LOG
 
+### 1.2.0
+**Refactorings**
+- controller path detecting only check `x-controller-folder` and `x-controller`
+- action name in controller SHOULD NOT includes `prefix` any more
+
 ### 1.1.11
 
 **New Features**

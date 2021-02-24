@@ -79,7 +79,7 @@ export class TestSuite {
   }
 
   @allureDecorators.severity(Severity.CRITICAL)
-  @test('locate controller.action , no `x-controller`, no `tags` => `default`')
+  @test('locate controller.action , no `x-controller` => `default`')
   public async test0() {
 
     const toPath = '/path0/of/api1';
@@ -112,7 +112,7 @@ export class TestSuite {
   }
 
   @allureDecorators.severity(Severity.CRITICAL)
-  @test('locate controller.action , no `x-controller`, has `tags[0]`')
+  @test('locate controller.action , has `x-controller`')
   public async test1() {
 
     const toPath = '/path1/of/api1';
@@ -145,7 +145,7 @@ export class TestSuite {
   }
 
   @allureDecorators.severity(Severity.CRITICAL)
-  @test('locate controller.action , has `x-controller`, has `tags[0]`')
+  @test('locate controller.action , has `x-controller`')
   public async test2() {
 
     const toPath = '/path2/of/api1';

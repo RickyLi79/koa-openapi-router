@@ -16,7 +16,7 @@
     },
     "/path0/of/api1": {
       "get": {
-        "description": "no tags",
+        "description": "no x-controller",
         "responses": {
           "default": {
             "description": "default"
@@ -26,10 +26,10 @@
     },
     "/path1/of/api1": {
       "get": {
-        "tags": [
+        "x-controller": [
           "tag1"
         ],
-        "description": "has `tags[0]`",
+        "description": "has `x-controller`",
         "responses": {
           "default": {
             "description": "default"
@@ -39,11 +39,8 @@
     },
     "/path2/of/api1": {
       "get": {
-        "tags": [
-          "tagX"
-        ],
         "x-controller": "tag1",
-        "description": "has `x-controller, `has `tags[0]`",
+        "description": "has `x-controller",
         "responses": {
           "default": {
             "description": "default"
@@ -63,7 +60,7 @@
     },
     "/path3/of/api1": {
       "get": {
-        "tags": [
+        "x-controller": [
           "actoinNameTesting"
         ],
         "description": "action name testing",
@@ -74,7 +71,7 @@
         }
       },
       "post": {
-        "tags": [
+        "x-controller": [
           "actoinNameTesting"
         ],
         "description": "action name testing",
@@ -102,7 +99,7 @@
     },
     "/path4/of/api1": {
       "get": {
-        "tags": [
+        "x-controller": [
           "actoinNameTesting"
         ],
         "description": "action name testing",
@@ -115,7 +112,7 @@
     },
     "/path5/of/api1": {
       "get": {
-        "tags": [
+        "x-controller": [
           "actoinNameTesting"
         ],
         "description": "action name testing",
