@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.toQueries = void 0;
 const tslib_1 = require("tslib");
-const querystring_1 = tslib_1.__importDefault(require("querystring"));
+const querystring = tslib_1.__importStar(require("querystring"));
 const RE_ARRAY_KEY = /[^\[\]]+\[\]$/;
 function toQueries(querystring) {
     return _customQuery(querystring, arrayValue);
@@ -24,7 +24,7 @@ function _customQuery(qryStr, filter) {
         cacheQuery = c[str] = {};
         const isQueries = true;
         // `querystring.parse` CANNOT parse something like `a[foo]=1&a[bar]=2`
-        const query = str ? querystring_1.default.parse(str) : {};
+        const query = str ? querystring.parse(str) : {};
         for (const key in query) {
             if (!key) {
                 // key is '', like `a=b&`

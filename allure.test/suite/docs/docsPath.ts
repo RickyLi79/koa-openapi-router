@@ -10,5 +10,7 @@ export const docsFile_valid_req_contentType_oas2_json = path.join(docsDir, 'vali
 export const docsFile_valid_res_header_oas3_yaml = path.join(docsDir, 'valid.res.header.oas3.yaml');
 export const docsFile_valid_res_body_oas3_yaml = path.join(docsDir, 'valid.res.body.oas3.yaml');
 export const docsFile_valid_res_body_oas2_json = path.join(docsDir, 'valid.res.body.oas2.json');
-export const docsFile_prefix_oas3_yaml = path.join(docsDir, 'prefix.oas3.yaml');
+export const docsFile_prefix_oas3_yaml = path.join(docsDir, 'x-path-prefix.oas3.yaml');
+export const docsFile_mute_oas3_yaml = path.join(docsDir, 'x-mute-env.oas3.yaml');
+export const docsFile_mute_global_oas3_yaml = path.join(docsDir, 'x-mute-env.global.oas3.yaml');
 

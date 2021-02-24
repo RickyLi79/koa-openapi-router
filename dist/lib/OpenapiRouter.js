@@ -162,13 +162,14 @@ class OpenapiRouter {
      * @private
      */
     getKoaControllerAction(opt, qry, force = false) {
-        var _a, _b, _c;
+        var _a, _b, _c, _d;
         if (this.proxyAction) {
             return {
                 file: '---',
                 func: '<proxy action>',
                 // action: this.proxyAction,
                 proxyAction: this.proxyAction,
+                mute: (_a = qry === null || qry === void 0 ? void 0 : qry.mute) !== null && _a !== void 0 ? _a : false,
             };
         }
         let actionInfo = this.koaControllerActionMap[opt];
@@ -176,9 +177,9 @@ class OpenapiRouter {
             return actionInfo;
         }
         const operation = this.getOperationByOpt(opt);
-        const tag = (_c = (_a = operation[X_CONTROLLER]) !== null && _a !== void 0 ? _a : (_b = operation.tags) === null || _b === void 0 ? void 0 : _b[0]) !== null && _c !== void 0 ? _c : 'default';
+        const tag = (_d = (_b = operation[X_CONTROLLER]) !== null && _b !== void 0 ? _b : (_c = operation.tags) === null || _c === void 0 ? void 0 : _c[0]) !== null && _d !== void 0 ? _d : 'default';
         qry = qry;
-        actionInfo = { file: tag + '.js', func: qry.method.toUpperCase() + ' ' + qry.path };
+        actionInfo = { mute: qry.mute, file: tag + '.js', func: qry.method.toUpperCase() + ' ' + qry.path };
         let ctl;
         if (OpenapiRouter.isEggApp) {
             ctl = OpenapiRouter.app.controller;
@@ -380,7 +381,7 @@ class OpenapiRouter {
         }
     }
     async connectOneApi(filename) {
-        var _a, _b, _c;
+        var _a, _b, _c, _d, _e, _f, _g;
         this.wactchingFile.add(filename);
         {
             // 注销$ref关系
@@ -420,6 +421,10 @@ class OpenapiRouter {
             }
         }
         const prefix = (_b = api['x-path-prefix']) !== null && _b !== void 0 ? _b : '';
+        const appEnv = (_d = (_c = OpenapiRouter.app.config) === null || _c === void 0 ? void 0 : _c.env) !== null && _d !== void 0 ? _d : OpenapiRouter.app.env;
+        let docMuteArr = (_e = api['x-mute-env']) !== null && _e !== void 0 ? _e : [];
+        if (!Array.isArray(docMuteArr))
+            docMuteArr = [docMuteArr];
         for (const iPath in api.paths) {
             const iPathItem = api.paths[iPath];
             for (const iMethod in iPathItem) {
@@ -429,23 +434,36 @@ class OpenapiRouter {
                     this.logger.warn(`duplicate operation : '${opt}' in '${filename}' OVERWRITED`);
                     // continue;
                 }
-                this.optInDoc[filename] = (_c = this.optInDoc[filename]) !== null && _c !== void 0 ? _c : [];
+                this.optInDoc[filename] = (_f = this.optInDoc[filename]) !== null && _f !== void 0 ? _f : [];
                 this.optInDoc[filename].push(opt);
                 const iOperation = iPathItem[iMethod];
                 iOperation[exports.X_OAS_VER] = specVersion;
                 this.operationMap[opt] = iOperation;
-                const actionInfo = this.getKoaControllerAction(opt, { method: iMethod, path: iPath2 });
-                this.addRouter(iMethod, iPath2, actionInfo);
-                // const fullOpt = `${iMethod.toUpperCase()} ${this.routerPrefix}${iPath2}`;
-                if (actionInfo.proxyAction !== undefined) {
-                    this.logger.debug(`openapi-router connected success : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' by 'proxyAction'`);
+                let mute = docMuteArr.includes(appEnv);
+                if (!mute) {
+                    let optMuteArr = (_g = iOperation['x-mute-env']) !== null && _g !== void 0 ? _g : [];
+                    if (!Array.isArray(optMuteArr))
+                        optMuteArr = [optMuteArr];
+                    mute = optMuteArr.includes(appEnv);
                 }
-                else if (actionInfo.action !== undefined) {
-                    this.logger.debug(`openapi-router connected success : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
+                iOperation[OpenapiRouterAction_1.MARKER_OPERATION_MUTED] = mute;
+                const actionInfo = this.getKoaControllerAction(opt, { mute, method: iMethod, path: iPath2 }, true);
+                this.addRouter(iMethod, iPath2, actionInfo);
+                if (!actionInfo.mute) {
+                    if (actionInfo.proxyAction !== undefined) {
+                        this.logger.info(`openapi-router connected success : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' by 'proxyAction'`);
+                    }
+                    else if (actionInfo.action !== undefined) {
+                        this.logger.info(`openapi-router connected success : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
+                    }
+                    else {
+                        this.logger.error(`openapi-router connect failed : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
+                    }
                 }
                 else {
-                    this.logger.error(`openapi-router connect failed : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}' from >   ${actionInfo.file}#'${actionInfo.func}'`);
+                    this.logger.info(`openapi-router connect muted : method='${iMethod.toUpperCase()}' path='${this.config.routerPrefix}${iPath2}', app.env==='${appEnv}', x-mute-env==='${JSON.stringify(iOperation['x-mute-env'])}' `);
                 }
+                // const fullOpt = `${iMethod.toUpperCase()} ${this.routerPrefix}${iPath2}`;
             }
         }
         return true;

@@ -1,15 +1,17 @@
 import * as jsonschema from 'jsonschema';
 import { toQueries } from './extend';
 import { OpenapiRouter, X_OAS_VER } from './OpenapiRouter';
-import { TEST_RESPONSE_HEADER_CONTROLLER_FILE, TEST_RESPONSE_HEADER_REQUEST_SCHEMA, TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS } from './Test-Response-Header';
+import { TEST_RESPONSE_HEADER_ACTION_MUTED, TEST_RESPONSE_HEADER_CONTROLLER_FILE, TEST_RESPONSE_HEADER_REQUEST_SCHEMA, TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, TEST_RESPONSE_HEADER_RESPONSE_HEADER_STATUS, TEST_RESPONSE_HEADER_TEST_ENABLED } from './Test-Response-Header';
 import { OperationSchema, OPERATION_SCHEMA, Schema } from './types';
 
 const OPEANAPI_PREFIX = 'x-openapi-';
 
-const HEADER_MARKER = `${OPEANAPI_PREFIX}mark`;
+const HEADER_MARKER = `${OPEANAPI_PREFIX}mark-`;
 const HEADER_MARKER_ACCEPT_CONTENT_TYPES = `${HEADER_MARKER}accept-content-types`;
 const HEADER_MARKER_REQUEST_BODY_REQUIRED = `${HEADER_MARKER}quest-body-required`;
 const HEADER_MARKER_RESPONSE_CONTENT_TYPES = `${HEADER_MARKER}response-content-types`;
+
+export const MARKER_OPERATION_MUTED = `${HEADER_MARKER}operation-muted`;
 
 export const OPENAPI_RQEUST_BODY_SCHEMA = `${OPEANAPI_PREFIX}request-bodySchema`;
 export const CTX_OPERATION_SCHEMA = Symbol(`OpenapiRouterAction#${OPERATION_SCHEMA}`);
@@ -20,15 +22,26 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
 
     // const prefix = (<any>ctx.router).opts.prefix ?? '';
     const opt = `${ctx.method.toUpperCase()} ${ctx.routerPath}`;
-
+    const config = openapiRouter.config;
     const operation: OperationSchema = openapiRouter.getOperationByOpt(opt);
+
+    if (config.test.enabled) {
+      ctx.set(TEST_RESPONSE_HEADER_TEST_ENABLED, true);
+    }
+
+    if (operation[MARKER_OPERATION_MUTED]) {
+      if (config.test.enabled) {
+        ctx.set(TEST_RESPONSE_HEADER_ACTION_MUTED, true);
+      }
+      ctx.status = 404;
+      return;
+    }
 
     if (operation === undefined) {
       ctx.status = 404;
       return;
     }
 
-    const config = openapiRouter.config;
     const actionInfo = openapiRouter.getKoaControllerAction(opt);
     if (config.test.enabled) {
       const controllerFile = openapiRouter.getKoaControllerActionFile(opt) + config.test.controllerFileExt;

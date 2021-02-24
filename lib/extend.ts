@@ -1,4 +1,4 @@
-import querystring from 'querystring';
+import * as querystring from 'querystring';
 const RE_ARRAY_KEY = /[^\[\]]+\[\]$/;
 
 export function toQueries(querystring: string) {

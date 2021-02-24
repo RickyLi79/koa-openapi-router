@@ -7,14 +7,15 @@ import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import path from 'path';
 import supertest, { SuperAgentTest } from 'supertest';
-import { AllureStepProxy } from 'supertest-allure-step-helper';
-import { attachmentJson, attachmentUtf8FileAuto, runStep } from 'supertest-allure-step-helper/helpers/AllureHelper';
+import { AllureHelper, AllureStepProxy } from 'supertest-allure-step-helper';
 import * as allureDecorators from 'ts-test-decorators';
 import { OpenapiRouter } from '../../lib/OpenapiRouter';
 import { createOpenapiRouterConfig } from '../../lib/OpenapiRouterConfig';
 import { IOpenapiRouterConfig } from '../../lib/types';
 import { MutedLogger, TestStore } from '../TestStore';
 import { docsFile_create_oas3_json } from './docs/docsPath';
+
+const { attachmentJson, attachmentUtf8FileAuto, runStep } = AllureHelper;
 
 let defaultOpenapiRouterConfig: IOpenapiRouterConfig;
 

@@ -1,0 +1,25 @@
+openapi: 3.0.0
+info:
+  title: "API"
+  version: "1.0.0"
+paths:
+  /hello:
+    get:
+      x-mute-env:
+        - development
+        - test
+      responses:
+        200:
+          description: ok
+  /nihao:
+    get:
+      x-mute-env: development
+      responses: 
+        200:
+          description: ok
+  /greeting:
+    get:
+      x-mute-env: test
+      responses: 
+        200:
+          description: ok

@@ -1,5 +1,5 @@
 import { suite, test } from '@testdeck/mocha';
-import { Severity } from 'allure-js-commons';
+import { Severity, Status } from 'allure-js-commons';
 import { allure } from 'allure-mocha/runtime';
 import http from 'http';
 import Koa from 'koa';
@@ -10,18 +10,17 @@ import { AllureHelper, AllureStepProxy } from 'supertest-allure-step-helper';
 import * as allureDecorators from 'ts-test-decorators';
 import { OpenapiRouter } from '../../lib/OpenapiRouter';
 import { createOpenapiRouterConfig } from '../../lib/OpenapiRouterConfig';
-import { TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS } from '../../lib/Test-Response-Header';
+import { TEST_RESPONSE_HEADER_ACTION_MUTED, TEST_RESPONSE_HEADER_TEST_ENABLED } from '../../lib/Test-Response-Header';
 import { IOpenapiRouterConfig } from '../../lib/types';
 import { MutedLogger, TestStore } from '../TestStore';
-import { docsFile_valid_res_body_oas3_yaml } from './docs/docsPath';
+import { docsFile_mute_oas3_yaml } from './docs/docsPath';
 
-const { attachmentJson, attachmentUtf8FileAuto, runStep } = AllureHelper;
+const { attachmentJson, attachmentUtf8FileAuto, runStep, logStep } = AllureHelper;
 
 let defaultOpenapiRouterConfig: IOpenapiRouterConfig;
 
-@suite('OpenapiRouter: valid.response.body  oas3')
+@suite("OpenapiRouter: operation['x-mute-env']")
 export class TestSuite {
-
 
   static server: http.Server;
   static app: Koa;
@@ -31,10 +30,11 @@ export class TestSuite {
     await TestStore.setup(this);
 
     runStep('mute OpenapiRouter.logger', () => { OpenapiRouter.logger = new MutedLogger(); });
+
     runStep('const defaultConfig', () => {
       defaultOpenapiRouterConfig = createOpenapiRouterConfig({
         controllerDir: path.join(__dirname, 'controller'),
-        docsDir: docsFile_valid_res_body_oas3_yaml,
+        docsDir: docsFile_mute_oas3_yaml,
         recursive: false,
         watcher: {
           enabled: false,
@@ -50,6 +50,7 @@ export class TestSuite {
       });
       attachmentJson('defaultConfig', defaultOpenapiRouterConfig);
     });
+
   }
 
   public static after() {
@@ -60,9 +61,7 @@ export class TestSuite {
 
   public async before() {
     allure.epic('koa-openapi-router');
-    allure.story('OpenapiRouter: valid : response.body');
-    OpenapiRouter.logger = new MutedLogger();
-    OpenapiRouter.closeAll();
+    allure.story("OpenapiRouter: operation['x-mute-env']");
     runStep('new Koa()', () => {
       TestSuite.app = new Koa();
       TestSuite.app.use(bodyParser());
@@ -83,10 +82,12 @@ export class TestSuite {
   }
 
   @allureDecorators.severity(Severity.NORMAL)
-  @test('valid.response : no `response.body` schema')
+  @test("operation['x-mute-env'] is Array")
   public async test1() {
 
-    const toPath = '/valid/response/body';
+    // OpenapiRouter.logger = console;
+
+    const toPath = '/hello';
     runStep(`set : toPath = '${toPath}'`, () => {
       return toPath;
     });
@@ -94,34 +95,38 @@ export class TestSuite {
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .stepName('expect(404)')
         .get(toPath)
         .expect(404)
+        .expectHeader(TEST_RESPONSE_HEADER_TEST_ENABLED, undefined)
         .endAllureStep();
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
       await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
+      attachmentJson('openapiRouter config', defaultOpenapiRouterConfig);
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
+
+    logStep(`current env === '${TestSuite.app.env}'`, Status.PASSED);
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .stepName('no `response.body`')
         .get(toPath)
-        .expect(200)
-        .expectHeader(TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '415')
+        .expect(404)
+        .expectHeader(TEST_RESPONSE_HEADER_TEST_ENABLED, 'true')
+        .expectHeader(TEST_RESPONSE_HEADER_ACTION_MUTED, 'true')
         .endAllureStep();
     }
-
   }
 
   @allureDecorators.severity(Severity.NORMAL)
-  @test('valid.response : `response.body` valid')
+  @test("operation['x-mute-env'] is string")
   public async test2() {
 
-    const toPath = '/valid/response/body';
+    // OpenapiRouter.logger = console;
+
+    const toPath = '/nihao';
     runStep(`set : toPath = '${toPath}'`, () => {
       return toPath;
     });
@@ -129,34 +134,38 @@ export class TestSuite {
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .stepName('expect(404)')
-        .post(toPath)
+        .get(toPath)
         .expect(404)
+        .expectHeader(TEST_RESPONSE_HEADER_TEST_ENABLED, undefined)
         .endAllureStep();
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
       await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
+      attachmentJson('openapiRouter config', defaultOpenapiRouterConfig);
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
+
+    logStep(`current env === '${TestSuite.app.env}'`, Status.PASSED);
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .stepName('`response.body` valid')
-        .post(toPath)
-        .expect(200)
-        .expectHeader(TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '200')
+        .get(toPath)
+        .expect(404)
+        .expectHeader(TEST_RESPONSE_HEADER_TEST_ENABLED, 'true')
+        .expectHeader(TEST_RESPONSE_HEADER_ACTION_MUTED, 'true')
         .endAllureStep();
     }
-
   }
-
   @allureDecorators.severity(Severity.NORMAL)
-  @test('valid.response : `response.body` invalid')
+
+  @test("operation['x-mute-env'] not match")
   public async test3() {
 
-    const toPath = '/valid/response/body';
+    // OpenapiRouter.logger = console;
+
+    const toPath = '/greeting';
     runStep(`set : toPath = '${toPath}'`, () => {
       return toPath;
     });
@@ -164,27 +173,28 @@ export class TestSuite {
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .stepName('expect(404)')
-        .patch(toPath)
+        .get(toPath)
         .expect(404)
+        .expectHeader(TEST_RESPONSE_HEADER_TEST_ENABLED, undefined)
         .endAllureStep();
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
       await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig);
+      attachmentJson('openapiRouter config', defaultOpenapiRouterConfig);
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
+
+    logStep(`current env === '${TestSuite.app.env}'`, Status.PASSED);
 
     {
       const agent = this.createAllureAgentProxy();
       await agent
-        .stepName('`response.body` invalid')
-        .patch(toPath)
-        .expect(200)
-        .expectHeader(TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '422')
+        .get(toPath)
+        .expect(501)
+        .expectHeader(TEST_RESPONSE_HEADER_TEST_ENABLED, 'true')
+        .expectHeader(TEST_RESPONSE_HEADER_ACTION_MUTED, undefined)
         .endAllureStep();
     }
-
   }
-
 }

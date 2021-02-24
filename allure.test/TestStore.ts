@@ -4,7 +4,7 @@ import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import path from 'path';
 import supertest from 'supertest';
-import { config, runStep, writePackageVerToEnvironmentInfo } from 'supertest-allure-step-helper/helpers/AllureHelper';
+import { AllureHelper } from 'supertest-allure-step-helper';
 import * as allureDecorators from 'ts-test-decorators';
 import { OpenapiRouter } from '../lib/OpenapiRouter';
 import { ILogger, IOptionalOpenapiRouterConfig } from '../lib/types';
@@ -56,9 +56,9 @@ class TestStoreStatic {
 
     if (this[ALLURE_INITED] === undefined) {
       allureDecorators.decorate<any>(allure);
-      config.baseDir = path.join(__dirname, 'suite');
+      AllureHelper.config.baseDir = path.join(__dirname, 'suite');
 
-      writePackageVerToEnvironmentInfo(process.cwd(), [ 'koa', 'koa-bodyparser', 'koa-router', 'supertest', 'jsonschema', '@apidevtools/swagger-parser' ]);
+      AllureHelper.writePackageVerToEnvironmentInfo(process.cwd(), [ 'koa', 'koa-bodyparser', 'koa-router', 'supertest', 'jsonschema', '@apidevtools/swagger-parser' ]);
 
       OpenapiRouter.logger = new MutedLogger();
       const testConfig: IOptionalOpenapiRouterConfig = {
@@ -105,7 +105,7 @@ class TestStoreStatic {
     }
   }
 
-  protected timer: NodeJS.Timeout;
+  protected timer!: NodeJS.Timeout;
   protected checkAllDown() {
     if (this.timer !== undefined) {
       clearTimeout(this.timer);
@@ -115,7 +115,7 @@ class TestStoreStatic {
 
   protected exit() {
     if (this[SUITE_COUNTER] <= 0) {
-      runStep('process.exit()', () => { process.exit(); });
+      AllureHelper.runStep('process.exit()', () => { process.exit(); });
     }
   }
 }
