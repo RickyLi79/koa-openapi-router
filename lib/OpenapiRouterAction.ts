@@ -45,7 +45,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
 
     const actionInfo = openapiRouter.getKoaControllerAction(opt);
     if (OpenapiRouter.testMode) {
-      const controllerFile = path.join(config.controllerDir, actionInfo.ctlPath ?? '??');
+      const controllerFile = path.join(config.controllerDir, actionInfo?.ctlPath ?? '??');
       // const controllerFile = openapiRouter.getKoaControllerActionFile(opt);
 
       ctx.set(TEST_RESPONSE_HEADER_CONTROLLER_FILE, controllerFile);
