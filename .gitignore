@@ -8,3 +8,4 @@ lib/**/*.map
 allure-results/
 allure-report/
 dist/
+package-lock.json
