@@ -16,7 +16,7 @@ const OPENAPI_ROUTER_MIDDLEWARE = Symbol('OpenapiRouter#openapiRouterMiddlerware
 export const X_OAS_VER = 'x-oas-ver';
 const X_CONTROLLER = 'x-controller';
 
-export type KoaControllerActionInfo = { mute:boolean, file: string, func: string, action?: KoaControllerAction, ctl?: any, proxyAction?: (ctx: IRouterContext, next?: Next) => Promise<any> };
+export type KoaControllerActionInfo = { mute: boolean, file: string, func: string, action?: KoaControllerAction, ctl?: any, proxyAction?: (ctx: IRouterContext, next?: Next) => Promise<any> };
 
 const OPENAPI_FILE_EXTS = { '.json': true, '.yaml': true, '.yml': true };
 function isDocsExt(file: string) {
@@ -215,7 +215,7 @@ export class OpenapiRouter {
   /**
    * @private
    */
-  public getKoaControllerAction(opt: string, qry?: { mute:boolean, method: string, path: string }, force = false): KoaControllerActionInfo {
+  public getKoaControllerAction(opt: string, qry?: { mute: boolean, method: string, path: string }, force = false): KoaControllerActionInfo {
     if (this.proxyAction) {
       return {
         file: '---',
@@ -484,7 +484,7 @@ export class OpenapiRouter {
     }
     const prefix = api['x-path-prefix'] ?? '';
     const appEnv = OpenapiRouter.app.config?.env ?? OpenapiRouter.app.env;
-    let docMuteArr = (api['x-mute-env'] as string|string[]) ?? [];
+    let docMuteArr = (api['x-mute-env'] as string | string[]) ?? [];
     if (!Array.isArray(docMuteArr)) docMuteArr = [ docMuteArr ];
     for (const iPath in api.paths) {
       const iPathItem = api.paths[iPath];
@@ -503,7 +503,7 @@ export class OpenapiRouter {
         this.operationMap[opt] = iOperation;
         let mute = docMuteArr.includes(appEnv);
         if (!mute) {
-          let optMuteArr = (iOperation['x-mute-env'] as string|string[]) ?? [];
+          let optMuteArr = (iOperation['x-mute-env'] as string | string[]) ?? [];
           if (!Array.isArray(optMuteArr)) optMuteArr = [ optMuteArr ];
           mute = optMuteArr.includes(appEnv);
         }
@@ -515,12 +515,12 @@ export class OpenapiRouter {
           if (actionInfo.proxyAction !== undefined) {
             this.markControllerStats(ControllerStatusEnum.PROXY, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>');
           } else if (actionInfo.action !== undefined) {
-            this.markControllerStats(ControllerStatusEnum.CONNECTED, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>');
+            this.markControllerStats(ControllerStatusEnum.CONNECTED, iMethod, `${this.config.routerPrefix}${iPath2}`, `${actionInfo.file}#'${actionInfo.func}'`);
           } else {
-            this.markControllerStats(ControllerStatusEnum.NotImpelement, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>');
+            this.markControllerStats(ControllerStatusEnum.NotImpelement, iMethod, `${this.config.routerPrefix}${iPath2}`, `${actionInfo.file}#'${actionInfo.func}'`);
           }
         } else {
-          this.markControllerStats(ControllerStatusEnum.MUTED, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>', `app.env==='${appEnv}', x-mute-env==='${JSON.stringify(iOperation['x-mute-env'])}`);
+          this.markControllerStats(ControllerStatusEnum.MUTED, iMethod, `${this.config.routerPrefix}${iPath2}`, '<null>', `app.env==='${appEnv}', x-mute-env==='${JSON.stringify(iOperation['x-mute-env'])}`);
         }
       }
     }
@@ -558,8 +558,8 @@ export class OpenapiRouter {
     }
   }
 
-  private markControllerStats(status:ControllerStatusEnum, method:string, path:string, dest:string, extraMsg?:string) {
-    const message = `[${status}] : method='${method.toUpperCase()}' path='${path}' by '${dest}' ${extraMsg ? '| ' + extraMsg : ''}`;
+  private markControllerStats(status: ControllerStatusEnum, method: string, path: string, dest: string, extraMsg?: string) {
+    const message = `[${status}] : method='${method.toUpperCase()}' path='${path}' from > '${dest}' ${extraMsg ? '| ' + extraMsg : ''}`;
     switch (status) {
       case ControllerStatusEnum.NotImpelement:
         this.logger.error(message);

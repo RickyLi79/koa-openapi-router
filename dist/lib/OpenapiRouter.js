@@ -461,14 +461,14 @@ class OpenapiRouter {
                         this.markControllerStats(types_1.ControllerStatusEnum.PROXY, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>');
                     }
                     else if (actionInfo.action !== undefined) {
-                        this.markControllerStats(types_1.ControllerStatusEnum.CONNECTED, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>');
+                        this.markControllerStats(types_1.ControllerStatusEnum.CONNECTED, iMethod, `${this.config.routerPrefix}${iPath2}`, `${actionInfo.file}#'${actionInfo.func}'`);
                     }
                     else {
-                        this.markControllerStats(types_1.ControllerStatusEnum.NotImpelement, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>');
+                        this.markControllerStats(types_1.ControllerStatusEnum.NotImpelement, iMethod, `${this.config.routerPrefix}${iPath2}`, `${actionInfo.file}#'${actionInfo.func}'`);
                     }
                 }
                 else {
-                    this.markControllerStats(types_1.ControllerStatusEnum.MUTED, iMethod, `${this.config.routerPrefix}${iPath2}`, '<proxyAction>', `app.env==='${appEnv}', x-mute-env==='${JSON.stringify(iOperation['x-mute-env'])}`);
+                    this.markControllerStats(types_1.ControllerStatusEnum.MUTED, iMethod, `${this.config.routerPrefix}${iPath2}`, '<null>', `app.env==='${appEnv}', x-mute-env==='${JSON.stringify(iOperation['x-mute-env'])}`);
                 }
             }
         }
@@ -495,7 +495,7 @@ class OpenapiRouter {
         }
     }
     markControllerStats(status, method, path, dest, extraMsg) {
-        const message = `[${status}] : method='${method.toUpperCase()}' path='${path}' by '${dest}' ${extraMsg ? '| ' + extraMsg : ''}`;
+        const message = `[${status}] : method='${method.toUpperCase()}' path='${path}' from > '${dest}' ${extraMsg ? '| ' + extraMsg : ''}`;
         switch (status) {
             case types_1.ControllerStatusEnum.NotImpelement:
                 this.logger.error(message);

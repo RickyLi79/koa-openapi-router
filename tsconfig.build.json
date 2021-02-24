@@ -25,5 +25,8 @@
     "declaration": true,
     "outDir": "./dist"
   },
-  "include": [ "index.ts", "./lib" ]
+  "include": [
+    "index.ts",
+    "./lib"
+  ]
 }
