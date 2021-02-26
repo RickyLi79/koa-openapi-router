@@ -11,12 +11,23 @@ import { AllureHelper, AllureStepProxy } from 'supertest-allure-step-helper';
 import * as allureDecorators from 'ts-test-decorators';
 import { OpenapiRouter } from '../../lib/OpenapiRouter';
 import { createOpenapiRouterConfig } from '../../lib/OpenapiRouterConfig';
-import { IOpenapiRouterConfig } from '../../lib/types';
+import { IOpenapiRouterConfig, IOpenapiRouterOptions, PowerPartial } from '../../lib/types';
 import { MutedLogger, TestStore } from '../TestStore';
 import { docsFile_create_oas3_json, docsFile_valid_req_body_oas3_yaml, docsFile_valid_req_para_oas3_json } from './docs/docsPath';
 const { attachmentJson, attachmentJsonByObj, attachmentUtf8FileAuto, runStep } = AllureHelper;
 
 let defaultOpenapiRouterConfig: IOpenapiRouterConfig;
+const option: PowerPartial<IOpenapiRouterOptions> = {
+  testMode: true,
+  recursive: true,
+  watcher: {
+    enabled: false,
+  },
+  validSchema: {
+    request: true,
+    reponse: true,
+  },
+};
 
 @suite('OpenapiRouter: create')
 export class TestSuite {
@@ -33,14 +44,6 @@ export class TestSuite {
       defaultOpenapiRouterConfig = createOpenapiRouterConfig({
         controllerDir: path.join(__dirname, 'controller'),
         docsDir: docsFile_create_oas3_json,
-        recursive: false,
-        watcher: {
-          enabled: false,
-        },
-        validSchema: {
-          request: true,
-          reponse: true,
-        },
       });
       attachmentJson('defaultConfig', defaultOpenapiRouterConfig);
     });
@@ -74,76 +77,7 @@ export class TestSuite {
     TestSuite.allureAgentProxy = AllureStepProxy.create(agent);
     return TestSuite.allureAgentProxy!;
   }
-  /*
-  @allureDecorators.severity(Severity.BLOCKER)
-  @test('by `new OpenapiRouter()` , one doc-file')
-  public async test1() {
 
-    const toPath = '/no/such/action/api1';
-    runStep(`set : toPath = '${toPath}'`, () => {
-      return toPath;
-    });
-
-    {
-      const agent = this.createAllureAgentProxy();
-      await agent
-        .get(toPath)
-        .expect(404)
-        .endAllureStep();
-    }
-
-    await runStep('new OpenapiRouter()', async () => {
-      const openapiRouter = new OpenapiRouter(defaultOpenapiRouterConfig);
-      await openapiRouter.loadOpenapi();
-      TestSuite.app.use(openapiRouter.getRouter().routes());
-      attachmentJson('openapiRouter config', openapiRouter.config);
-      attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
-    });
-
-    {
-      const agent = this.createAllureAgentProxy();
-      await agent
-        .get(toPath)
-        .expect(501)
-        .endAllureStep();
-    }
-  }
-
-  @allureDecorators.severity(Severity.BLOCKER)
-  @test('by `new OpenapiRouter()` , scan dir')
-  public async test2() {
-
-    const toPath = '/no/such/action/api1';
-    runStep(`set : toPath = '${toPath}'`, () => {
-      return toPath;
-    });
-
-    {
-      const agent = this.createAllureAgentProxy();
-      await agent
-        .get(toPath)
-        .expect(404)
-        .endAllureStep();
-    }
-
-    await runStep('new OpenapiRouter()', async () => {
-      const config = extend(true, {}, defaultOpenapiRouterConfig, { docsDir });
-      const openapiRouter = new OpenapiRouter(config);
-      await openapiRouter.loadOpenapi();
-      TestSuite.app.use(openapiRouter.getRouter().routes());
-
-      attachmentJson('openapiRouter config', openapiRouter.config);
-    });
-
-    {
-      const agent = this.createAllureAgentProxy();
-      await agent
-        .get(toPath)
-        .expect(501)
-        .endAllureStep();
-    }
-  }
- */
   @allureDecorators.severity(Severity.BLOCKER)
   @test('by `OpenapiRouter.Start()` , use `Router.IRouterOptions`')
   public async test3() {
@@ -163,7 +97,7 @@ export class TestSuite {
 
     await runStep('OpenapiRouter.Start()', async () => {
       const routerConfig = extend(true, {}, defaultOpenapiRouterConfig, { routerPrefix: '/api' });
-      await OpenapiRouter.Start(TestSuite.app, routerConfig, { testMode: true });
+      await OpenapiRouter.Start(TestSuite.app, routerConfig, option);
       attachmentJsonByObj({ routerConfig });
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
@@ -224,7 +158,7 @@ export class TestSuite {
       const config1 = extend(true, {}, defaultOpenapiRouterConfig, { routerPrefix: '/api1', docsDir: docsFile_create_oas3_json });
       const config2 = extend(true, {}, defaultOpenapiRouterConfig, { routerPrefix: '/api2', docsDir: docsFile_valid_req_para_oas3_json });
       const config3 = extend(true, {}, defaultOpenapiRouterConfig, { routerPrefix: '/api3', docsDir: docsFile_valid_req_body_oas3_yaml });
-      await OpenapiRouter.Start(TestSuite.app, [ config1, config2, config3 ], { testMode: true });
+      await OpenapiRouter.Start(TestSuite.app, [ config1, config2, config3 ], option);
       attachmentJsonByObj([ config1, config2, config3 ]);
       attachmentUtf8FileAuto(config1.docsDir);
       attachmentUtf8FileAuto(config2.docsDir);

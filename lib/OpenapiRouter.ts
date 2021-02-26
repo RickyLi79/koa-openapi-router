@@ -7,13 +7,14 @@ import Router, { IRouterContext } from 'koa-router';
 import * as path from 'path';
 import * as watch from 'watch';
 import { FileOrFiles } from 'watch';
-import OpenapiRouterAction, { CTX_OPEANAPI_ROUTER, MARKER_OPERATION_MUTED } from './OpenapiRouterAction';
+import OpenapiRouterAction, { MARKER_OPERATION_MUTED } from './OpenapiRouterAction';
 import { defaultOpenapiRouterConfig } from './OpenapiRouterConfig';
-import { ControllerStatusEnum, ILogger, IOpenapiRouterConfig, IOpenapiRouterOptions, IOptionalOpenapiRouterConfig, KoaControllerAction, OperationSchema } from './types';
+import { ControllerStatusEnum, ILogger, IOpenapiRouterConfig, IOpenapiRouterOptions, IOptionalOpenapiRouterConfig, KoaControllerAction, OperationSchema, PowerPartial } from './types';
 
 export const OPENAPI_ROUTER_LOGGER = Symbol('OpenapiRouter#openapiRouterLogger');
 const OPENAPI_ROUTER_MIDDLEWARE = Symbol('OpenapiRouter#openapiRouterMiddlerware');
 export const X_OAS_VER = 'x-oas-ver';
+const X_IGNORE_PATHS = 'x-ignore-paths';
 const X_CONTROLLER = 'x-controller';
 const X_CONTROLLER_FOLDER = 'x-controller-folder';
 const X_PREFIX = 'x-path-prefix';
@@ -63,7 +64,6 @@ export class OpenapiRouter {
     if (!OpenapiRouter.isEggApp) {
       this._router = new Router({ prefix: config.routerPrefix });
     }
-    this.proxyAction = config.proxyAction;
     OpenapiRouter._openapiRouters.push(this);
   }
 
@@ -89,12 +89,33 @@ export class OpenapiRouter {
   public static isEggApp = false;
   private static app: any;
   public static testMode = false;
-  public static async Start(app: any, configs: IOptionalOpenapiRouterConfig | (IOptionalOpenapiRouterConfig[]), options?: IOpenapiRouterOptions) {
-    if (options?.logger) this.logger = options?.logger;
-    if (options?.proxyAction !== undefined) this.proxyAction = options.proxyAction;
-    this.testMode = !!options?.testMode;
+  public static options: IOpenapiRouterOptions;
+  public static async Start(app: any, configs: IOptionalOpenapiRouterConfig | (IOptionalOpenapiRouterConfig[]), options?: PowerPartial<IOpenapiRouterOptions>) {
+    this.options = extend(true, {},
+      {
+        isEggApp: false,
+
+        useAllowedMethods: false,
+
+        testMode: false,
+        recursive: true,
+
+        watcher: {
+          enabled: false, interval: 3000,
+        },
+        validSchema: {
+          request: true,
+          useDefault: true,
+          reponse: false,
+        },
+        options,
+      },
+      options);
+    if (this.options.logger) this.logger = this.options.logger;
+    this.proxyAction = this.options.proxyAction;
+    this.testMode = !!this.options.testMode;
     this.app = app;
-    this.isEggApp = !!options?.isEggApp;
+    this.isEggApp = !!this.options.isEggApp;
     if (!Array.isArray(configs)) { configs = [ configs ]; }
     const promiseArr: Promise<boolean>[] = [];
     for (const iConfig of configs) {
@@ -102,16 +123,11 @@ export class OpenapiRouter {
       promiseArr.push(openapiRouter.loadOpenapi());
       if (!this.isEggApp) {
         app.use(openapiRouter._router.routes());
-        if (options?.useAllowedMethods) {
+        if (this.options.useAllowedMethods) {
           app.use(openapiRouter._router.allowedMethods());
         }
       }
     }
-    /*
-    if (this.testMode) {
-      this.addTestModeRouter(app);
-    }
-     */
     await Promise.all(promiseArr);
   }
 
@@ -197,33 +213,20 @@ export class OpenapiRouter {
  */
   // #endregion
 
-  private _proxyAction?: KoaControllerAction;
   public static proxyAction?: KoaControllerAction;
 
-
-  /**
-   * if set, all request will lead to this method.
-   *
-   * set `undefined` to resume normal mode
-   */
-  public get proxyAction() {
-    return this._proxyAction ?? OpenapiRouter.proxyAction;
-  }
-  public set proxyAction(value: KoaControllerAction | undefined) {
-    this._proxyAction = value;
-  }
   private koaControllerActionMap: { [opt: string]: KoaControllerActionInfo } = {};
 
   /**
    * @private
    */
   public getKoaControllerAction(opt: string, qry?: { ctlPath: string, prefix: string, mute: boolean, method: string, path: string }, force = false): KoaControllerActionInfo {
-    if (this.proxyAction) {
+    if (OpenapiRouter.proxyAction) {
       return {
         file: '---',
         func: '<proxy action>',
         // action: this.proxyAction,
-        proxyAction: this.proxyAction,
+        proxyAction: OpenapiRouter.proxyAction,
         mute: qry?.mute ?? false,
         ctlPath: qry?.ctlPath,
       };
@@ -330,7 +333,7 @@ export class OpenapiRouter {
         rejects(err);
       }
 
-      this.close(false);
+      this.close();
 
       const handler = (f: FileOrFiles, curr: fs.Stats, prev: fs.Stats) => {
         if (curr.isDirectory()) {
@@ -361,14 +364,14 @@ export class OpenapiRouter {
 
       watch.createMonitor(docsDir,
         {
-          interval: this.config.watcher.interval / 1000,
+          interval: OpenapiRouter.options.watcher.interval / 1000,
           filter: (file, stat) => {
             if (docFilename !== '') {
               return file === docFilename;
             }
 
             if (stat.isDirectory()) {
-              return this.config.recursive;
+              return OpenapiRouter.options.recursive;
             }
             return isDocsExt(file);
           },
@@ -382,7 +385,7 @@ export class OpenapiRouter {
               promisArr.push(this.connectOneApi(iFilename));
             }
           }
-          if (!this.config.watcher.enabled) {
+          if (!OpenapiRouter.options.watcher.enabled) {
             watch.unwatchTree(docsDir);
           } else {
             this.logger.info(`file watcher enabled : ${docsDir}`);
@@ -399,7 +402,7 @@ export class OpenapiRouter {
   /**
    * dispose current OpeanapiRouter
    */
-  public close(dispose = true) {
+  public close() {
     // reset
     this.watchMonitor?.stop();
     // watch.unwatchTree(docsDir);
@@ -407,7 +410,6 @@ export class OpenapiRouter {
     this.operationMap = {};
     this.docsRefs = {};
     this.optInDoc = {};
-    if (dispose) { this.proxyAction = undefined; }
     for (const iFilename of this.wactchingFile.values()) {
       OpenapiRouter.unwatchOutterFile(this, iFilename);
     }
@@ -469,6 +471,11 @@ export class OpenapiRouter {
       return false;
     }
 
+    if (api[X_IGNORE_PATHS] === true) {
+      this.logger.info(`SKIPPED '${filename}' by '${X_IGNORE_PATHS}'`);
+      return false;
+    }
+
     const specVersion = api.swagger ? 2 : Number.parseInt(api.openapi);
 
     {
@@ -481,7 +488,7 @@ export class OpenapiRouter {
         }
         this.docsRefs[iFilename].add(filename);
 
-        if (this.config.watcher.enabled) {
+        if (OpenapiRouter.options.watcher.enabled) {
           if (!this.wactchingFile.has(iFilename)) {
             OpenapiRouter.watchOutterFile(this, iFilename);
           }
@@ -583,7 +590,7 @@ export class OpenapiRouter {
 
 
 async function proxyActionMw(ctx: IRouterContext, next: Next) {
-  const proxyAction = ctx[CTX_OPEANAPI_ROUTER]?.proxyAction;
+  const proxyAction = OpenapiRouter.proxyAction;
   let re: any;
   if (proxyAction) {
     re = proxyAction(<any>ctx, next);

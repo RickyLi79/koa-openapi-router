@@ -11,11 +11,22 @@ import { AllureHelper, AllureStepProxy } from 'supertest-allure-step-helper';
 import * as allureDecorators from 'ts-test-decorators';
 import { OpenapiRouter } from '../../lib/OpenapiRouter';
 import { createOpenapiRouterConfig } from '../../lib/OpenapiRouterConfig';
-import { IOpenapiRouterConfig } from '../../lib/types';
+import { IOpenapiRouterConfig, IOpenapiRouterOptions, PowerPartial } from '../../lib/types';
 import { MutedLogger, TestStore } from '../TestStore';
 import { docsFile_create_oas3_json } from './docs/docsPath';
 
 let defaultOpenapiRouterConfig: IOpenapiRouterConfig;
+const option: PowerPartial<IOpenapiRouterOptions> = {
+  testMode: true,
+  recursive: true,
+  watcher: {
+    enabled: false,
+  },
+  validSchema: {
+    request: true,
+    reponse: true,
+  },
+};
 
 @suite('OpenapiRouter: proxyAction')
 export class TestSuite {
@@ -32,14 +43,6 @@ export class TestSuite {
       defaultOpenapiRouterConfig = createOpenapiRouterConfig({
         controllerDir: path.join(__dirname, 'controller'),
         docsDir: docsFile_create_oas3_json,
-        recursive: false,
-        watcher: {
-          enabled: false,
-        },
-        validSchema: {
-          request: true,
-          reponse: true,
-        },
       });
       AllureHelper.attachmentJson('defaultConfig', defaultOpenapiRouterConfig);
     });
@@ -90,16 +93,13 @@ export class TestSuite {
         .endAllureStep();
     }
     await AllureHelper.runStep('OpenapiRouter.Start(), with `proxyAction`', async () => {
-      const config = createOpenapiRouterConfig(
-        defaultOpenapiRouterConfig,
-        {
-          proxyAction: async (ctx: IRouterContext) => {
-            ctx.status = 305;
-            ctx.set('x-mark', 'proxyAction');
-            ctx.body = 'ok';
-          },
-        });
-      await OpenapiRouter.Start(TestSuite.app, config, { testMode: true });
+      const config = createOpenapiRouterConfig(defaultOpenapiRouterConfig);
+      await OpenapiRouter.Start(TestSuite.app, config, { ...option,
+        proxyAction: async (ctx: IRouterContext) => {
+          ctx.status = 305;
+          ctx.set('x-mark', 'proxyAction');
+          ctx.body = 'ok';
+        } });
       AllureHelper.attachmentUtf8FileAuto(config.docsDir);
     });
 
@@ -130,11 +130,9 @@ export class TestSuite {
         .endAllureStep();
     }
 
-    let openapiRouter!: OpenapiRouter;
     await AllureHelper.runStep('OpenapiRouter.Start(), no `proxyAction`', async () => {
-      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig, { testMode: true });
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig, option);
       AllureHelper.attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
-      openapiRouter = OpenapiRouter.getOpenapiRouters()[0];
     });
 
     {
@@ -148,7 +146,7 @@ export class TestSuite {
 
     {
       await AllureHelper.runStep('set `proxyAction`', async () => {
-        openapiRouter.proxyAction = async (ctx: IRouterContext) => {
+        OpenapiRouter.proxyAction = async (ctx: IRouterContext) => {
           ctx.status = 305;
           ctx.set('x-mark', 'proxyAction');
           ctx.body = 'ok';
@@ -166,7 +164,7 @@ export class TestSuite {
 
     {
       await AllureHelper.runStep('remove `proxyAction`', async () => {
-        openapiRouter.proxyAction = undefined;
+        OpenapiRouter.proxyAction = undefined;
       });
 
       const agent = this.createAllureAgentProxy();
@@ -193,11 +191,9 @@ export class TestSuite {
         .endAllureStep();
     }
 
-    let openapiRouter!: OpenapiRouter;
     await AllureHelper.runStep('OpenapiRouter.Start(), no `proxyAction`', async () => {
-      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig, { testMode: true });
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig, option);
       AllureHelper.attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
-      openapiRouter = OpenapiRouter.getOpenapiRouters()[0];
     });
 
     {
@@ -211,7 +207,7 @@ export class TestSuite {
 
     {
       await AllureHelper.runStep('set `proxyAction`', async () => {
-        openapiRouter.proxyAction = async (ctx: IRouterContext) => {
+        OpenapiRouter.proxyAction = async (ctx: IRouterContext) => {
           ctx.status = 305;
           ctx.set('x-mark', 'proxyAction');
           ctx.body = 'ok';
@@ -229,7 +225,7 @@ export class TestSuite {
 
     {
       await AllureHelper.runStep('remove `proxyAction`', async () => {
-        openapiRouter.proxyAction = undefined;
+        OpenapiRouter.proxyAction = undefined;
       });
 
       const agent = this.createAllureAgentProxy();

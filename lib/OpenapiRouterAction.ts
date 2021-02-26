@@ -62,7 +62,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
     ctx[CTX_OPEANAPI_ROUTER] = openapiRouter;
     const doc_ver: 2 | 3 = operation[X_OAS_VER];
     const queries = ctx.queries ?? toQueries(ctx.request.querystring);
-    if (config.validSchema.request) {
+    if (OpenapiRouter.options.validSchema.request) {
       let bodyRequired = false;
       let bodySchema: any;
       if (operation.parameters !== undefined) {
@@ -232,7 +232,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
       await re;
     }
 
-    if (config.validSchema.reponse) {
+    if (OpenapiRouter.options.validSchema.reponse) {
       do {
         let toBreak = false;
         const reponseSchema = operation.responses[ctx.status];
@@ -391,5 +391,7 @@ function rewrite(instance: any, schema: any): any {
         return instance;
     }
   }
-  return instance;
+  return instance ?? (
+    OpenapiRouter.options.validSchema.useDefault ? schema.default : instance
+  );
 }

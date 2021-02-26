@@ -9,43 +9,23 @@ export interface ILogger {
 export type KoaControllerAction = (ctx: any, next?: () => Promise<any>) => Promise<any>;
 
 export type IOpenapiRouterOptions = {
+
   logger?: ILogger,
-  isEggApp?: boolean,
-  useAllowedMethods?: boolean,
+
+  isEggApp: boolean,
+
+  useAllowedMethods: boolean,
+
+  /**
+   * the middleware before all action called
+   */
   proxyAction?: KoaControllerAction,
 
-  testMode?: boolean;
-};
-
-export type IOptionalOpenapiRouterConfig = PowerPartial<IOpenapiRouterConfig>;
-
-export type IOpenapiRouterConfig = {
-
-
   /**
-   * Prefix for koa-router.
+   * @private
+   * @ignore
    */
-  routerPrefix: string;
-
-
-  /**
-   * controller folder name
-   * @example
-   * ```typescript
-   * path.join(process.cwd(), "controller/openapi")
-   * ```
-   */
-  controllerDir: string,
-
-  /**
-   * folder of openapi docs
-   * @example
-   * ```typescript
-   * path.join(process.cwd(), "openapi-doc")
-   * ```
-   */
-  docsDir: string,
-
+  testMode: boolean;
 
   /**
    * Indicates whether all subdirectories should be watched, or only the current directory. This applies when a directory is specified by `#docsDir`
@@ -79,16 +59,47 @@ export type IOpenapiRouterConfig = {
     request: boolean,
 
     /**
+     * when `instance` value is `undefined`, set `instance` to `default` in schema
+     * @default true
+     */
+    useDefault: boolean,
+
+    /**
      * `true` is recommanded in dev env.
      * @default false
      */
     reponse: boolean
   },
+};
+
+export type IOptionalOpenapiRouterConfig = PowerPartial<IOpenapiRouterConfig>;
+
+export type IOpenapiRouterConfig = {
+
 
   /**
-   * if set, all operation will lead to this handler
+   * Prefix for koa-router.
    */
-  proxyAction?: KoaControllerAction,
+  routerPrefix: string;
+
+
+  /**
+   * controller folder name
+   * @example
+   * ```typescript
+   * path.join(process.cwd(), "controller/openapi")
+   * ```
+   */
+  controllerDir: string,
+
+  /**
+   * folder of openapi docs
+   * @example
+   * ```typescript
+   * path.join(process.cwd(), "openapi-doc")
+   * ```
+   */
+  docsDir: string,
 
 };
 

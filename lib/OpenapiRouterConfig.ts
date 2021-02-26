@@ -11,16 +11,6 @@ export const defaultOpenapiRouterConfig: IOpenapiRouterConfig = {
   controllerDir: '',
   docsDir: '',
 
-  recursive: true,
-  watcher: {
-    enabled: false,
-    interval: 3000,
-  },
-
-  validSchema: {
-    request: true,
-    reponse: false,
-  },
 };
 
 

@@ -11,11 +11,22 @@ import * as allureDecorators from 'ts-test-decorators';
 import { OpenapiRouter } from '../../lib/OpenapiRouter';
 import { createOpenapiRouterConfig } from '../../lib/OpenapiRouterConfig';
 import { TEST_RESPONSE_HEADER_ACTION_MUTED, TEST_RESPONSE_HEADER_TEST_ENABLED } from '../../lib/Test-Response-Header';
-import { IOpenapiRouterConfig } from '../../lib/types';
+import { IOpenapiRouterConfig, IOpenapiRouterOptions, PowerPartial } from '../../lib/types';
 import { MutedLogger, TestStore } from '../TestStore';
 import { docsFile_mute_global_oas3_yaml } from './docs/docsPath';
 
 let defaultOpenapiRouterConfig: IOpenapiRouterConfig;
+const option: PowerPartial<IOpenapiRouterOptions> = {
+  testMode: true,
+  recursive: true,
+  watcher: {
+    enabled: false,
+  },
+  validSchema: {
+    request: true,
+    reponse: true,
+  },
+};
 
 @suite("OpenapiRouter: oasDoc['x-mute-env']")
 export class TestSuite {
@@ -33,14 +44,6 @@ export class TestSuite {
       defaultOpenapiRouterConfig = createOpenapiRouterConfig({
         controllerDir: path.join(__dirname, 'controller'),
         docsDir: docsFile_mute_global_oas3_yaml,
-        recursive: false,
-        watcher: {
-          enabled: false,
-        },
-        validSchema: {
-          request: true,
-          reponse: true,
-        },
       });
       AllureHelper.attachmentJson('defaultConfig', defaultOpenapiRouterConfig);
     });
@@ -96,7 +99,7 @@ export class TestSuite {
     }
 
     await AllureHelper.runStep('OpenapiRouter.Start()', async () => {
-      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig, { testMode: true });
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig, option);
       AllureHelper.attachmentJson('openapiRouter config', defaultOpenapiRouterConfig);
       AllureHelper.attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });

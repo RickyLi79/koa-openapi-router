@@ -10,13 +10,24 @@ import { AllureHelper, AllureStepProxy } from 'supertest-allure-step-helper';
 import * as allureDecorators from 'ts-test-decorators';
 import { OpenapiRouter } from '../../lib/OpenapiRouter';
 import { createOpenapiRouterConfig } from '../../lib/OpenapiRouterConfig';
-import { IOpenapiRouterConfig } from '../../lib/types';
+import { IOpenapiRouterConfig, IOpenapiRouterOptions, PowerPartial } from '../../lib/types';
 import { MutedLogger, TestStore } from '../TestStore';
 import { docsFile_valid_req_body_oas2_json } from './docs/docsPath';
 
 const { attachmentJson, attachmentUtf8FileAuto, runStep } = AllureHelper;
 
 let defaultOpenapiRouterConfig: IOpenapiRouterConfig;
+const option: PowerPartial<IOpenapiRouterOptions> = {
+  testMode: true,
+  recursive: true,
+  watcher: {
+    enabled: false,
+  },
+  validSchema: {
+    request: true,
+    reponse: true,
+  },
+};
 
 @suite('OpenapiRouter: valid.request.body - oas2')
 export class TestSuite {
@@ -34,14 +45,6 @@ export class TestSuite {
       defaultOpenapiRouterConfig = createOpenapiRouterConfig({
         controllerDir: path.join(__dirname, 'controller'),
         docsDir: docsFile_valid_req_body_oas2_json,
-        recursive: false,
-        watcher: {
-          enabled: false,
-        },
-        validSchema: {
-          request: true,
-          reponse: true,
-        },
       });
       attachmentJson('defaultConfig', defaultOpenapiRouterConfig);
     });
@@ -97,7 +100,7 @@ export class TestSuite {
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
-      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig, { testMode: true });
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig, option);
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
 
@@ -161,7 +164,7 @@ export class TestSuite {
     }
 
     await runStep('OpenapiRouter.Start()', async () => {
-      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig, { testMode: true });
+      await OpenapiRouter.Start(TestSuite.app, defaultOpenapiRouterConfig, option);
       attachmentUtf8FileAuto(defaultOpenapiRouterConfig.docsDir);
     });
 

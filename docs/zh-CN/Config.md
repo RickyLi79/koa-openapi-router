@@ -12,7 +12,8 @@
 ---
 ## Config 配置 
 
-#### 定义
+
+#### IOpenapiRouterConfig
 ```ts
 export type IOpenapiRouterConfig = {
 
@@ -85,6 +86,74 @@ export type IOpenapiRouterConfig = {
 
 };
 ```
+
+#### IOpenapiRouterOptions
+```ts
+export type IOpenapiRouterOptions = {
+
+  logger?: ILogger,
+
+  isEggApp: boolean,
+
+  useAllowedMethods: boolean,
+
+  /**
+   * the middleware before all action called
+   */
+  proxyAction?: KoaControllerAction,
+
+
+  /**
+   * Indicates whether all subdirectories should be watched, or only the current directory. This applies when a directory is specified by `#docsDir`
+   * @default true
+   */
+  recursive: boolean;
+
+  /**
+   * Watch file/dir. This is for dev. DON NOT enable in prod env.
+   */
+  watcher: {
+    /**
+     * @default false
+     */
+    enabled: boolean,
+    /**
+     * scan file every `interval` ms
+     * @default 3000
+     */
+    interval: number,
+  };
+
+
+  /**
+   * validation config
+   */
+  validSchema: {
+    /**
+     * @default true
+     */
+    request: boolean,
+
+    /**
+     * when `instance` value is `undefined`, set `instance` to `default` in schema
+     * @default true
+     */
+    useDefault: boolean,
+
+    /**
+     * `true` is recommanded in dev env.
+     * @default false
+     */
+    reponse: boolean
+  },
+};
+```
+
+
+
+
+
+
 
 #### 通过`createOpenapiRouterConfig()`初始化
 ```ts

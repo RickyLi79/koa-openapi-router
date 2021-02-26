@@ -64,14 +64,6 @@ class TestStoreStatic {
       const testConfig: IOptionalOpenapiRouterConfig = {
         controllerDir: path.join(__dirname, 'suite/controller'),
         docsDir: docsFile_create_oas3_json,
-        recursive: false,
-        watcher: {
-          enabled: false,
-        },
-        validSchema: {
-          request: true,
-          reponse: true,
-        },
       };
 
       const app: Koa = suite.app = new Koa();

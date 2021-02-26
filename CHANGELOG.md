@@ -1,5 +1,11 @@
 ## CHANGE LOG
 
+### 1.3.0
+**New Features**
+- OpenapiDoc `x-ignore-paths`
+**Refactorings**
+- atts `[ 'recursive', 'watcher', 'validSchema ] ` in `IOpenapiRouterConfig` removed to `IOpenapiRouterOptions` 
+
 ### 1.2.0
 **Refactorings**
 - controller path detecting only check `x-controller-folder` and `x-controller`
