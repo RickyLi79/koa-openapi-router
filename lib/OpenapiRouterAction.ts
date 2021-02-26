@@ -207,7 +207,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
         try {
           const bodyBox = { value: ctx.request.body };
           jsonschema.validate(bodyBox, { type: 'object', properties: { value: reqBodySchema } }, { throwError: true, throwFirst: true, preValidateProperty, rewrite });
-          ctx.request.body = bodyBox;
+          ctx.request.body = bodyBox.value;
         } catch (err) {
           ctx.status = 422;
           const e: jsonschema.ValidationError = err.errors[0];

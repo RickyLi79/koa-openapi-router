@@ -10,6 +10,12 @@ export type KoaControllerAction = (ctx: any, next?: () => Promise<any>) => Promi
 
 export type IOpenapiRouterOptions = {
 
+  /**
+   * abs path style.
+   * @default '~'
+   */
+  absChar?: string;
+
   logger?: ILogger,
 
   isEggApp: boolean,

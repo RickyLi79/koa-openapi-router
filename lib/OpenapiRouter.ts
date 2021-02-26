@@ -93,6 +93,8 @@ export class OpenapiRouter {
   public static async Start(app: any, configs: IOptionalOpenapiRouterConfig | (IOptionalOpenapiRouterConfig[]), options?: PowerPartial<IOpenapiRouterOptions>) {
     this.options = extend(true, {},
       {
+        absChar: '~',
+
         isEggApp: false,
 
         useAllowedMethods: false,
@@ -276,14 +278,28 @@ export class OpenapiRouter {
     }
 
     if (ctl) {
+      const absPath = opt.split(' ')[1];
+      const absChar = OpenapiRouter.options.absChar;
       let func = qry.method.toUpperCase() + ' ' + qry.path;
       actionInfo.action = ctl[func];
+      if (!actionInfo.action) {
+        func = `${absChar}${qry.method.toUpperCase()} ${absPath}`;
+        actionInfo.action = ctl[func];
+      }
       if (!actionInfo.action) {
         func = 'ALL ' + qry.path;
         actionInfo.action = ctl[func];
       }
       if (!actionInfo.action) {
+        func = `${absChar}ALL ${absPath}`;
+        actionInfo.action = ctl[func];
+      }
+      if (!actionInfo.action) {
         func = qry.path;
+        actionInfo.action = ctl[func];
+      }
+      if (!actionInfo.action) {
+        func = `${absChar}${absPath}`;
         actionInfo.action = ctl[func];
       }
 
