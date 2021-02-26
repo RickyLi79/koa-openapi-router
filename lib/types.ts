@@ -203,6 +203,6 @@ export interface OperationSchema {
 export enum ControllerStatusEnum{
   PROXY = 'proxyAction',
   CONNECTED = 'connected',
-  NotImpelement = 'notImpelement',
+  NotImpelemented = 'not implemented',
   MUTED = 'muted'
 }

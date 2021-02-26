@@ -533,7 +533,7 @@ export class OpenapiRouter {
           } else if (actionInfo.action !== undefined) {
             this.markControllerStats(ControllerStatusEnum.CONNECTED, iMethod, `${opt}`, `'${actionInfo.file}' # '${actionInfo.func}'`);
           } else {
-            this.markControllerStats(ControllerStatusEnum.NotImpelement, iMethod, `${opt}`, `'${actionInfo.file}' # '${actionInfo.func}'`);
+            this.markControllerStats(ControllerStatusEnum.NotImpelemented, iMethod, `${opt}`, `'${actionInfo.file}' # '${actionInfo.func}'`);
           }
         } else {
           this.markControllerStats(ControllerStatusEnum.MUTED, iMethod, `${opt}`, '<null>', `app.env==='${appEnv}', x-mute-env==='${JSON.stringify(iOperation['x-mute-env'])}`);
@@ -577,7 +577,7 @@ export class OpenapiRouter {
   private markControllerStats(status: ControllerStatusEnum, method: string, path: string, dest: string, extraMsg?: string) {
     const message = `[${status}] : method='${method.toUpperCase()}' path='${path}' from > ${dest} ${extraMsg ? '| ' + extraMsg : ''}`;
     switch (status) {
-      case ControllerStatusEnum.NotImpelement:
+      case ControllerStatusEnum.NotImpelemented:
         this.logger.error(message);
         break;
 
