@@ -14,9 +14,10 @@ const HEADER_MARKER_RESPONSE_CONTENT_TYPES = `${HEADER_MARKER}response-content-t
 
 export const MARKER_OPERATION_MUTED = `${HEADER_MARKER}operation-muted`;
 
-export const OPENAPI_RQEUST_BODY_SCHEMA = `${OPEANAPI_PREFIX}request-bodySchema`;
-export const CTX_OPERATION_SCHEMA = Symbol(`OpenapiRouterAction#${OPERATION_SCHEMA}`);
-export const CTX_OPEANAPI_ROUTER = Symbol('OpenapiRouterAction#openapiRouter');
+const OPENAPI_RQEUST_BODY_SCHEMA = `${OPEANAPI_PREFIX}request-bodySchema`;
+const CTX_OPERATION_SCHEMA = Symbol(`OpenapiRouterAction#${OPERATION_SCHEMA}`);
+const CTX_OPEANAPI_ROUTER = Symbol('OpenapiRouterAction#openapiRouter');
+const CTX_OPEANAPI_REQUEST_QUERY = Symbol('OpenapiRouterAction#openapiRouter.request.query');
 
 export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
   return async (ctx: any, next: any) => {
@@ -66,156 +67,163 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
       let bodyRequired = false;
       let bodySchema: any;
       if (operation.parameters !== undefined) {
+        const qry: { [name: string]: any } = {};
         for (const iOpt of operation.parameters) {
           let iOptRequired: boolean = iOpt.required ?? false;
-          let para: any;
+          let param: any;
           let location: string = iOpt.in;
           switch (iOpt.in) {
             case 'path':
-              para = ctx.params[iOpt.name];
+              param = ctx.params[iOpt.name];
               break;
             case 'query':
-              para = queries[iOpt.name];
-              if (para === undefined) break;
+              param = queries[iOpt.name];
+              if (param === undefined) break;
               switch (iOpt.style) {
                 case 'form':
                   break;
                 case 'pipeDelimited':
                   {
-                    const arr: string[] = para[0].split('|');
-                    para = {};
+                    const arr: string[] = param[0].split('|');
+                    param = {};
                     for (let i = 0; i < arr.length; i += 2) {
-                      para[arr[i]] = arr[i + 1];
+                      param[arr[i]] = arr[i + 1];
                     }
                   }
                   break;
                 case 'spaceDelimited':
                   {
-                    const arr: string[] = para[0].split(' ');
-                    para = {};
+                    const arr: string[] = param[0].split(' ');
+                    param = {};
                     for (let i = 0; i < arr.length; i += 2) {
-                      para[arr[i]] = arr[i + 1];
+                      param[arr[i]] = arr[i + 1];
                     }
                   }
                   break;
                 default:
-                  para = para[0];
+                  param = param[0];
                   break;
 
               }
               break;
             case 'header':
-              para = ctx.get(iOpt.name);
-              if (para === '') { para = undefined; }
+              param = ctx.get(iOpt.name);
+              if (param === '') { param = undefined; }
               break;
             case 'cookie':
-              para = ctx.cookies.get(iOpt.name);
+              param = ctx.cookies.get(iOpt.name);
               break;
             case 'body':
               bodyRequired = iOptRequired;
               bodySchema = iOpt.schema;
 
               iOptRequired = false;
-              para = undefined;
+              param = undefined;
               location = 'unknown';
               break;
             default:
-              para = undefined;
+              param = undefined;
               location = 'unknown';
               break;
           }
 
-
-          if (para !== undefined) {
-            try {
-              jsonschema.validate({ value: para }, { type: 'object', properties: { value: iOpt.schema } }, { throwFirst: true, throwError: true, preValidateProperty, rewrite });
-            } catch (err) {
-              ctx.status = 422;
-              const e: jsonschema.ValidationError = err.errors[0];
-              const re = { location, property: iOpt.name, instance: e.instance, message: e.message };
-              ctx.body = re;
-              return;
-            }
-          } else if (iOptRequired === true) {
+          if (iOptRequired === true && param === undefined) {
             ctx.status = 422;
             ctx.body = { message: `'${iOpt.name}' in '${location}' required` };
             return;
           }
-        }
-      }
-
-      // #region `body` validation
-      {
-        let acceptContentTypes: { [contentType: string]: true } = operation[HEADER_MARKER_ACCEPT_CONTENT_TYPES];
-        let requestBodyRequired: boolean = operation[HEADER_MARKER_REQUEST_BODY_REQUIRED];
-        let contentType: string | undefined;
-
-        if (acceptContentTypes === undefined) {
-          acceptContentTypes = {};
-          if (doc_ver === 2) {
-            for (const iContentType of operation.consumes ?? []) {
-              acceptContentTypes[iContentType] = true;
-            }
-            requestBodyRequired = bodyRequired;
-          } else {
-            for (const iContentType in operation.requestBody?.content) {
-              requestBodyRequired = requestBodyRequired || operation.requestBody?.required;
-              acceptContentTypes[iContentType] = true;
-            }
-          }
-          operation[HEADER_MARKER_ACCEPT_CONTENT_TYPES] = acceptContentTypes;
-          operation[HEADER_MARKER_REQUEST_BODY_REQUIRED] = requestBodyRequired ?? false;
-        }
-
-        const ctxContentType = ctx.request.type;
-        if (acceptContentTypes) {
-          if (acceptContentTypes[ctxContentType]) {
-            contentType = ctxContentType;
-          } else {
-            for (const iContentType in acceptContentTypes) {
-              if (ctx.is(iContentType) !== false) {
-                contentType = iContentType;
-                break;
-              }
-            }
-          }
-        }
-
-        if (!contentType && requestBodyRequired && acceptContentTypes) {
-          if (acceptContentTypes || ctxContentType) {
-            ctx.status = 415;
-            return;
-          }
-        }
-        const reqBodySchema = doc_ver === 2 ? bodySchema : operation.requestBody?.content[contentType!]?.schema;
-        ctx[OPENAPI_RQEUST_BODY_SCHEMA] = reqBodySchema;
-        if (Object.keys(ctx.request.body).length === 0) {
-          if (requestBodyRequired !== true) {
-            // pass
-          } else {
-            ctx.status = 422;
-            ctx.body = { message: 'request `body` required' };
-            return;
-          }
-        } else if (reqBodySchema) {
-
           try {
-            jsonschema.validate({ value: ctx.request.body }, { type: 'object', properties: { value: reqBodySchema } }, { throwError: true, throwFirst: true, preValidateProperty, rewrite });
+            const paramBox = { value: param };
+            jsonschema.validate(paramBox, { type: 'object', properties: { value: iOpt.schema } }, { throwFirst: true, throwError: true, preValidateProperty, rewrite });
+            if (iOpt.in === 'query') {
+              qry[iOpt.name] = paramBox.value;
+            }
           } catch (err) {
             ctx.status = 422;
             const e: jsonschema.ValidationError = err.errors[0];
-            const re = { location: 'body', property: e.path, instance: e.instance, message: e.message };
+            const re = { location, property: iOpt.name, instance: e.instance, message: e.message };
             ctx.body = re;
             return;
           }
+
+        }
+        ctx[CTX_OPEANAPI_REQUEST_QUERY] = qry;
+      }
+
+      // #region `body` validation
+      let acceptContentTypes: { [contentType: string]: true } = operation[HEADER_MARKER_ACCEPT_CONTENT_TYPES];
+      let requestBodyRequired: boolean = operation[HEADER_MARKER_REQUEST_BODY_REQUIRED];
+      let contentType: string | undefined;
+
+      if (acceptContentTypes === undefined) {
+        acceptContentTypes = {};
+        if (doc_ver === 2) {
+          for (const iContentType of operation.consumes ?? []) {
+            acceptContentTypes[iContentType] = true;
+          }
+          requestBodyRequired = bodyRequired;
+        } else {
+          for (const iContentType in operation.requestBody?.content) {
+            requestBodyRequired = requestBodyRequired || operation.requestBody?.required;
+            acceptContentTypes[iContentType] = true;
+          }
+        }
+        operation[HEADER_MARKER_ACCEPT_CONTENT_TYPES] = acceptContentTypes;
+        operation[HEADER_MARKER_REQUEST_BODY_REQUIRED] = requestBodyRequired ?? false;
+      }
+
+      const ctxContentType = ctx.request.type;
+      if (acceptContentTypes) {
+        if (acceptContentTypes[ctxContentType]) {
+          contentType = ctxContentType;
+        } else {
+          for (const iContentType in acceptContentTypes) {
+            if (ctx.is(iContentType) !== false) {
+              contentType = iContentType;
+              break;
+            }
+          }
         }
       }
+
+      if (!contentType && requestBodyRequired && acceptContentTypes) {
+        if (acceptContentTypes || ctxContentType) {
+          ctx.status = 415;
+          return;
+        }
+      }
+      const reqBodySchema = doc_ver === 2 ? bodySchema : operation.requestBody?.content[contentType!]?.schema;
+      ctx[OPENAPI_RQEUST_BODY_SCHEMA] = reqBodySchema;
+      if (Object.keys(ctx.request.body).length === 0) {
+        if (requestBodyRequired !== true) {
+          // pass
+        } else {
+          ctx.status = 422;
+          ctx.body = { message: 'request `body` required' };
+          return;
+        }
+      } else if (reqBodySchema) {
+
+        try {
+          const bodyBox = { value: ctx.request.body };
+          jsonschema.validate(bodyBox, { type: 'object', properties: { value: reqBodySchema } }, { throwError: true, throwFirst: true, preValidateProperty, rewrite });
+          ctx.request.body = bodyBox;
+        } catch (err) {
+          ctx.status = 422;
+          const e: jsonschema.ValidationError = err.errors[0];
+          const re = { location: 'body', property: e.path, instance: e.instance, message: e.message };
+          ctx.body = re;
+          return;
+        }
+      }
+
       // #endregion
     }
 
     ctx[CTX_OPERATION_SCHEMA] = operation;
     ctx.getOperation = getOperation.bind(ctx);
     ctx.getRequestBodySchema = getRequestBodySchema.bind(ctx);
+    ctx.getRequestQuery = getRequestQuery.bind(ctx);
 
     let re: any;
     if (OpenapiRouter.isEggApp) {
@@ -312,7 +320,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
               try {
                 jsonschema.validate(ctx.body, resContentSchema, { throwError: true, throwFirst: true, preValidateProperty });
               } catch (err) {
-                OpenapiRouter.logger.error(err.errors[0]);
+                OpenapiRouter.logger.warn(err.errors[0]);
                 if (OpenapiRouter.testMode) {
                   ctx.response.set(TEST_RESPONSE_HEADER_RESPONSE_BODY_STATUS, '422');
                   break;
@@ -320,7 +328,7 @@ export default function OpenapiRouterAction(openapiRouter: OpenapiRouter): any {
               }
             }
           } catch (err) {
-            OpenapiRouter.logger.error(err);
+            OpenapiRouter.logger.warn(err);
           }
         } else {
           if (OpenapiRouter.testMode) {
@@ -348,6 +356,10 @@ function getOperation(this: any): OperationSchema {
 
 function getRequestBodySchema(this: any): Schema {
   return this[OPENAPI_RQEUST_BODY_SCHEMA];
+}
+
+function getRequestQuery(this: any) {
+  return this[CTX_OPEANAPI_REQUEST_QUERY];
 }
 
 function preValidateProperty(instance: any, key: string, schema: any): any {

@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "config koa-router by openapi, valid the request by opanapi",
   "scripts": {
     "mocha:debug": "mocha -R mocha-multi-reporters --reporter-options configFile=mocha-multi-reporters.json --timeout 1000000 --colors --require ts-node/register allure.test/debug.ts",
@@ -12,7 +12,7 @@
     "build": "tsc -p tsconfig.build.json",
     "allure": "npm run allure:test && npm run allure:report",
     "allure:debug": "npm run allure:clean && npm run mocha:debug && npm run allure:report",
-    "allure:report": "allure generate allure-results --clean -o allure-report && allure open -h localhost -p 5501 allure-report",
+    "allure:report": "allure generate allure-results --clean -o allure-report && allure open -h localhost allure-report",
     "allure:clean": "rimraf ./allure-results",
     "allure:test": "npm run allure:clean && mocha -R mocha-multi-reporters --reporter-options configFile=mocha-multi-reporters.json --timeout 5000 --colors --require ts-node/register allure.test/**/*.allure.ts",
     "example": "mocha --require ts-node/register test/example.test.ts"
